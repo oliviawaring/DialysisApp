@@ -1,7 +1,7 @@
 //initializations
-int breakPin = A0;
+int breakPin = A0; //use analog input 0 on arduino uno
 int breakValue = 1023; //highest analog read
-int motor = 11;
+int motor = 11; //use PWM pin 11 on the arduino uno
 
 //Parameters
 int systolic_pressure = 30; //mmHg
@@ -22,11 +22,10 @@ void setup() {
 
 void loop() {
   for (breakValue>10){ //if the button is not depressed
-    analogWrite(motor, systolic);
+    analogWrite(motor, systolic); //systolic pressure half the interval
     delay(duration/2);
-    analogWrite(motor, diastolic);
+    analogWrite(motor, diastolic); //diastolic pressure half the interval
     delay(duration/2);
-    breakValue = analogRead(breakPin); //update breakValue
+    breakValue = analogRead(breakPin); //update breakValue every time it is valid
   }
 }
-
