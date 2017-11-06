@@ -46,15 +46,26 @@
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+const int buttonPin = 7;
+
+int buttonState = 0;
+
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
+char Page1[] = "This is instruction #1 of the dialysis procedure.";
+char Page2[] = "This is instruction #2 of the dialysis procedure.";
+char Page3[] = "This is instruction #3 of the dialysis procedure.";
 
+
+void nextPage () {
+
+}
 
 void scrollInFromRight (int line, char str1[]) {
   int i = strlen(str1);
-  for (int j = 16; j >= 0; j--) {
+  for (int j = i; j >= 0; j--) {
     lcd.setCursor(0, line);
-    for (int k = 0; k <= 15; k++) {
+    for (int k = 0; k <= i; k++) {
       lcd.print(" "); // Clear line
     }
     lcd.setCursor(j, line);
@@ -76,7 +87,7 @@ void setup() {
 void loop() {
   // Turn off the display:
   lcd.clear();
-  scrollInFromRight(0, "Line1 From Right");
-  scrollInFromRight(1, "Line2 From Right");
+  scrollInFromRight(0, "This is a Dialysis-related instruction.");
+ // scrollInFromRight(1, "Click the button to proceed.");
   lcd.clear();
 }
