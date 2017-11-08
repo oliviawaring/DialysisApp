@@ -13,6 +13,8 @@ byte colPins[COLS] = {3, 8, 5}; //connect to the column pinouts of the keypad
 //same pin keypad to arduino, pin1 to 8
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
+String keyString = "";
+
 void setup(){
   Serial.begin(9600);
 }
@@ -22,5 +24,6 @@ void loop(){
 
   if (key != NO_KEY){
     Serial.print(key);
+    keyString += key;
   }
 }
