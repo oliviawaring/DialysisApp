@@ -16,6 +16,8 @@
 
 #include "Picaso_Serial_4DLib.h"
 #include "Picaso_Const4D.h"
+#include "Keypad.h"
+
 
 Picaso_Serial_4DLib Display(&DisplaySerial);
 
@@ -34,6 +36,21 @@ const char *strings[] = {"This is dialysis instruction 1. Insert the cartridge."
                          NULL};
 const char *helpText = "Do you need help?"; 
 const char *homeText = "Welcome to your in-home dialysis buddy!"; 
+const byte ROWS = 4; // Four rows
+const byte COLS = 4; // Four columns
+// Define the Keymap
+char keys[ROWS][COLS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'#','0','*','D'}
+};
+byte rowPins[ROWS] = { 5, 4, 3, 2 };
+byte colPins[COLS] = { 6, 7, 8, 9 }; 
+
+Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+
+
 /*void homeScreen()
 {
   Display.gfx_Cls();   // clear screen
@@ -88,8 +105,6 @@ void nextpage(int ErrCode, unsigned char Errorbyte)
 #endif
 }
 // end of routine to handle Serial errors
-
-
 
 word BstateBack, BstateNext, BstateHelp ;
 word x, y ;
@@ -172,6 +187,33 @@ void showPage(int page)
   Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
   Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
   Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
+  int v1 = getNumber();
+  int v2 = getNumber();
+  Serial.print(v1 + v2);
+  Serial.print(v1 * v2);
+}
+
+int getNumber()
+{
+   char key = kpd.getKey();
+   int num = 0;
+   if(key)
+   {
+      switch (key) 
+      {
+         case NO_KEY:
+            break;
+         case '0': case '1': case '2': case '3': case '4':
+         case '5': case '6': case '7': case '8': case '9':
+            Display.putstr(key);
+            num = num * 10 + (key - '0');
+            break;
+         case '*': case '#': case 'A': case 'B': case 'C': case 'D':
+            return num;
+            break;
+      }
+   }
+   return num;
 }
 
 void loop()
@@ -181,6 +223,7 @@ void loop()
    byte buttonState2 = digitalRead(BUTTON2);
    byte buttonState3 = digitalRead(BUTTON3);
    byte buttonState4 = digitalRead(BUTTON4);
+
 
    touchState = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
   //-----------------------------------------------------------------------------------------
