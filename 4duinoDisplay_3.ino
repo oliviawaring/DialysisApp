@@ -19,7 +19,10 @@ Picaso_Serial_4DLib Display(&DisplaySerial);
 // routine to handle Serial errors
 
 
-const char *strings[] = {"page 1","page 2","page 3",NULL};
+const char *strings[] = {"This is dialysis instruction 1. Insert the cartridge.",
+                         "This is dialysis instruction 2. Snap and tap.",
+                         "This is dialysis instruction 3. Cannulate.",
+                         NULL};
 
 /*void homeScreen()
 {
@@ -80,7 +83,9 @@ void nextpage(int ErrCode, unsigned char Errorbyte)
 
 word BstateBack, BstateNext, BstateHelp ;
 word x, y ;
-int page;
+int page = 0;
+void goNext(int & page) ;
+void goBack(int & page) ;
 
 void setup()
 {
@@ -152,27 +157,6 @@ void showPage(int page)
   Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
 }
 
-int goBack(word BstateBack, int page) 
-{
-  BstateBack = !BstateBack ;
-  Display.putstr("the page # is:" + page) ;
-  if (page != 0)
-  {
-    page = page - 1;
-  }
-  return page;
-}
-
-int goNext(int page) 
-{
-  BstateNext = !BstateNext ;
-  Display.putstr("the page # is:" + page) ;
-  if (strings[page - 1] != NULL)
-  {
-    page = page + 1;
-  }
-  return page;
-}
 
 void goHelp(word BstateHelp)
 {
@@ -196,19 +180,44 @@ void loop()
   {
     if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
     {
-      showPage(goBack(BstateBack, page));
+      goBack(page);
+      showPage(page);
     }
     else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
     {
-      goHelp(BstateHelp);     
+      goHelp();     
     }
     else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
     {
-      page = goNext(page);
+      goNext(page);
       showPage(page);
     }
   }
-  
+}
+
+void goNext(int &page) 
+{  
+  //BstateNext = !BstateNext ;
+  if (page == 0)
+  {
+    Serial.println("I'm inside the loop");
+    page++;
+  }
+  else if (strings[page + 1] != NULL ) 
+  {
+    page++;
+  }
+  Serial.print(page);
+}
+
+void goBack(int &page) 
+{
+  //BstateBack = !BstateBack ;
+  if (page != 0)
+  {
+    page--;
+  }
+  Serial.print(page);
 }
 
 
