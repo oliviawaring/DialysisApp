@@ -6,6 +6,10 @@
 //#define LOG_MESSAGES Serial
 
 #define RESETLINE     30
+#define BUTTON1       10 
+#define BUTTON2       11
+#define BUTTON3       12  
+#define BUTTON4       13 
 
 #define DisplaySerial Serial1
 
@@ -18,12 +22,16 @@ Picaso_Serial_4DLib Display(&DisplaySerial);
 
 // routine to handle Serial errors
 
+#define buttonPin1   10 
+#define buttonPin2   11 
+#define buttonPin3   12  
+#define buttonPin4   13 
+
 
 const char *strings[] = {"This is dialysis instruction 1. Insert the cartridge.",
                          "This is dialysis instruction 2. Snap and tap.",
                          "This is dialysis instruction 3. Cannulate.",
                          NULL};
-
 const char *helpText = "Do you need help?"; 
 const char *homeText = "Welcome to your in-home dialysis buddy!"; 
 /*void homeScreen()
@@ -94,10 +102,14 @@ boolean inHomePage = true;
 
 void setup()
 {
- pinMode(RESETLINE, OUTPUT);       // Display reset pin
-digitalWrite(RESETLINE, 1);       // Reset Display, using shield
+  pinMode(BUTTON1, INPUT);
+  pinMode(BUTTON2, INPUT);
+  pinMode(BUTTON3, INPUT);
+  pinMode(BUTTON4, INPUT);
+  pinMode(RESETLINE, OUTPUT);       // Display reset pin
+  digitalWrite(RESETLINE, 1);       // Reset Display, using shield
   delay(100);                       // wait for it to be recognised
-digitalWrite(RESETLINE, 0);       // Release Display Reset, using shield
+  digitalWrite(RESETLINE, 0);       // Release Display Reset, using shield
 // Uncomment when using ESP8266
 //  pinMode(ESPRESET, OUTPUT);        // ESP reset pin
 //  digitalWrite(ESPRESET, 1);        // Reset ESP
@@ -164,11 +176,15 @@ void showPage(int page)
 
 void loop()
 {  
-   byte state ;
+   byte touchState ;
+   byte buttonState1 = digitalRead(BUTTON1);
+   byte buttonState2 = digitalRead(BUTTON2);
+   byte buttonState3 = digitalRead(BUTTON3);
+   byte buttonState4 = digitalRead(BUTTON4);
 
-   state = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
+   touchState = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
   //-----------------------------------------------------------------------------------------
-  if((state == TOUCH_PRESSED) || (state == TOUCH_MOVING))                       // if there's a press, or it's moving
+  if((touchState == TOUCH_PRESSED) || (touchState == TOUCH_MOVING))                       // if there's a press, or it's moving
   {
     x = Display.touch_Get(TOUCH_GETX);
     y = Display.touch_Get(TOUCH_GETY);
@@ -177,7 +193,7 @@ void loop()
   //-----------------------------------------------------------------------------------------
   if (!inHomePage)
   {
-     if(state == TOUCH_RELEASED)                      // if there's a release
+     /* if(touchState == TOUCH_RELEASED)                      // if there's a release
      {
         if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
         {
@@ -193,11 +209,29 @@ void loop()
            goNext(page);
            showPage(page);
         }
+     } */
+     if (buttonState1 == HIGH) 
+     {
+         goBack(page);
+         showPage(page);
+     }
+     else if (buttonState2 == HIGH) 
+     {
+         goNext(page);
+         showPage(page);
+     }
+     else if (buttonState3 == HIGH) 
+     {
+         getHelp();
+     }
+     else if (buttonState4 == HIGH) 
+     {
+         goHome();
      }
   }
   else
   {
-    if(state == TOUCH_RELEASED)                      // if there's a release
+    if(touchState == TOUCH_RELEASED)                      // if there's a release
      {
         if ((x >= 80) && (x <= 140) && (y >= 100) && (y <= 130))     // Width=200 Height= 60
         {
@@ -211,15 +245,8 @@ void loop()
 void goNext(int &page) 
 {  
   //BstateNext = !BstateNext ;
-  if (page == 0)
-  {
-    Serial.println("I'm inside the loop");
-    page++;
-  }
-  else if (strings[page + 1] != NULL ) 
-  {
-    page++;
-  }
+  if ((page == 0) || (strings[page + 1] != NULL ))
+     page++;
   Serial.print(page);
 }
 
@@ -227,9 +254,7 @@ void goBack(int &page)
 {
   //BstateBack = !BstateBack ;
   if (page != 0)
-  {
-    page--;
-  }
+     page--;
   Serial.print(page);
 }
 
@@ -246,10 +271,4 @@ void goHome()
   Display.putstr(homeText) ;
   Display.gfx_Button(BstateBack, 80, 100, RED, BLACK, FONT3, 2, 2, "Start") ;
 }
-
-
-
-
-
-
 
