@@ -25,6 +25,7 @@ const char *strings[] = {"This is dialysis instruction 1. Insert the cartridge."
                          NULL};
 
 const char *helpText = "Do you need help?"; 
+const char *homeText = "Welcome to your in-home dialysis buddy!"; 
 /*void homeScreen()
 {
   Display.gfx_Cls();   // clear screen
@@ -87,6 +88,9 @@ word x, y ;
 int page = 0;
 void goNext(int & page) ;
 void goBack(int & page) ;
+void getHelp() ;
+void goHome() ;
+boolean inHomePage = true;
 
 void setup()
 {
@@ -135,9 +139,8 @@ digitalWrite(RESETLINE, 0);       // Release Display Reset, using shield
   Display.gfx_MoveTo(0,0) ;
   Display.putstr("Here we have an instruction related to dialysis. Yay! What fun.") ;      
   Display.putstr(strings[0]);// Start with LED OFF
-//  homeScreen();
-
   byte state ;
+  goHome();
   state = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
   //-----------------------------------------------------------------------------------------
   if((state == TOUCH_PRESSED) || (state == TOUCH_MOVING))                       // if there's a press, or it's moving
@@ -149,6 +152,7 @@ digitalWrite(RESETLINE, 0);       // Release Display Reset, using shield
 
 } // end Setup **do not alter, remove or duplicate this line**
 
+
 void showPage(int page)
 {
   Display.gfx_Cls();   // clear screen
@@ -156,11 +160,6 @@ void showPage(int page)
   Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
   Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
   Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
-}
-
-
-void goHelp(word BstateHelp)
-{
 }
 
 void loop()
@@ -176,23 +175,36 @@ void loop()
   }
 
   //-----------------------------------------------------------------------------------------
-  
-  if(state == TOUCH_RELEASED)                      // if there's a release
+  if (!inHomePage)
   {
-    if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
-    {
-      goBack(page);
-      showPage(page);
-    }
-    else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
-    {
-      getHelp();     
-    }
-    else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
-    {
-      goNext(page);
-      showPage(page);
-    }
+     if(state == TOUCH_RELEASED)                      // if there's a release
+     {
+        if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
+        {
+           goBack(page);
+           showPage(page);
+        }
+        else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
+        {
+           getHelp();     
+        }
+        else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
+        {
+           goNext(page);
+           showPage(page);
+        }
+     }
+  }
+  else
+  {
+    if(state == TOUCH_RELEASED)                      // if there's a release
+     {
+        if ((x >= 80) && (x <= 140) && (y >= 100) && (y <= 130))     // Width=200 Height= 60
+        {
+           showPage(0);
+           inHomePage = !inHomePage; 
+        }
+     }
   }
 }
 
@@ -228,6 +240,12 @@ void getHelp()
   Display.gfx_Button(BstateBack, 0, 100, RED, BLACK, FONT3, 2, 2, "Dial Clinician") ;
 }
 
+void goHome() 
+{
+  Display.gfx_Cls();   // clear screen
+  Display.putstr(homeText) ;
+  Display.gfx_Button(BstateBack, 80, 100, RED, BLACK, FONT3, 2, 2, "Start") ;
+}
 
 
 
