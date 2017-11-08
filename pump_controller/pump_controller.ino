@@ -21,7 +21,7 @@ void setup() {
 }
 
 void loop() {
-  for (breakValue>10){ //if the button is not depressed
+  while(breakValue>10){ //if the button is not depressed
     analogWrite(motor, systolic); //systolic pressure half the interval
     delay(duration/2);
     analogWrite(motor, diastolic); //diastolic pressure half the interval
