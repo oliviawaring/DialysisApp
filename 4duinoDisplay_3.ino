@@ -24,6 +24,7 @@ const char *strings[] = {"This is dialysis instruction 1. Insert the cartridge."
                          "This is dialysis instruction 3. Cannulate.",
                          NULL};
 
+const char *helpText = "Do you need help?"; 
 /*void homeScreen()
 {
   Display.gfx_Cls();   // clear screen
@@ -185,7 +186,7 @@ void loop()
     }
     else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
     {
-      goHelp();     
+      getHelp();     
     }
     else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
     {
@@ -219,6 +220,14 @@ void goBack(int &page)
   }
   Serial.print(page);
 }
+
+void getHelp() 
+{
+  Display.gfx_Cls();   // clear screen
+  Display.putstr(helpText) ;
+  Display.gfx_Button(BstateBack, 0, 100, RED, BLACK, FONT3, 2, 2, "Dial Clinician") ;
+}
+
 
 
 
