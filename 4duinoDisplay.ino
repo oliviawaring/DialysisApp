@@ -29,11 +29,6 @@ Picaso_Serial_4DLib Display(&DisplaySerial);
 #define buttonPin3   12  
 #define buttonPin4   13 
 
-
-const char *strings[] = {"This is dialysis instruction 1. Insert the cartridge.",
-                         "This is dialysis instruction 2. Snap and tap.",
-                         "This is dialysis instruction 3. Cannulate.",
-                         NULL};
 const char *helpText = "Do you need help?"; 
 const char *homeText = "Welcome to your in-home dialysis buddy!"; 
 const byte ROWS = 4; // Four rows
@@ -43,41 +38,24 @@ char keys[ROWS][COLS] = {
   {'1','2','3','A'},
   {'4','5','6','B'},
   {'7','8','9','C'},
-  {'#','0','*','D'}
+  {'.','0','#','D'}
 };
-byte rowPins[ROWS] = { 5, 4, 3, 2 };
+byte rowPins[ROWS] = { 2, 3, 4, 5 };
 byte colPins[COLS] = { 6, 7, 8, 9 }; 
 
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
-
-/*void homeScreen()
+struct Page
 {
-  Display.gfx_Cls();   // clear screen
-  Display.putstr("Welcome to your in-home dialysis portal.") ;  
-  Display.gfx_Button(BUTTON_UP, 50, 220, GRAY, WHITE, FONT3, 3, 3, "START") ;
+  char *text;
+  boolean acceptsInput;
+};
 
-  if(state == TOUCH_RELEASED)                      // if there's a release
-  {
-    if ((x >= 50) && (x <= 170) && (y >= 220) && (y <= 280))     // Width=200 Height= 60
-    {
-      BstateBack = !BstateBack ;
-      Display.gfx_MoveTo(10,120) ;
-      if (BstateBack)   // If button state is ON
-      {
-        Display.gfx_Button(BstateBack, 20, 40, RED, WHITE, FONT3, 3, 3, "Press Me") ;
-        Display.putstr("LED State: ON ") ;
-        digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-      }
-      else   // If button state is off
-      {
-         Display.gfx_Button(BstateBack, 20, 40, GRAY, WHITE, FONT3, 3, 3, "Press Me") ;
-         Display.putstr("LED State: OFF") ;
-         digitalWrite(13, LOW);   // turn the LED on (HIGH is the voltage level)
-      }
-    }
-}*/
-
+Page pages[4] = {{"This is dialysis instruction 1. Insert the cartridge.", false},
+                 {"This is dialysis instruction 2. Snap and tap.", false},
+                 {"This is dialysis instruction 3. Cannulate.", false},
+                 {"Enter the patient's weight: \n", true}};
+ 
 void nextpage(int ErrCode, unsigned char Errorbyte)
 {
 #ifdef LOG_MESSAGES
@@ -108,7 +86,7 @@ void nextpage(int ErrCode, unsigned char Errorbyte)
 
 word BstateBack, BstateNext, BstateHelp ;
 word x, y ;
-int page = 0;
+int pageNum = 0;
 void goNext(int & page) ;
 void goBack(int & page) ;
 void getHelp() ;
@@ -137,16 +115,6 @@ void setup()
   Display.TimeLimit4D = 5000 ;      // 5 second timeout on all commands
   Display.Callback4D = nextpage ;
 
-// uncomment if using ESP8266
-//  ESPserial.begin(115200) ;         // assume esp set to 115200 baud, it's default setting
-                                    // what we need to do is attempt to flip it to 19200
-                                    // the maximum baud rate at which software serial actually works
-                                    // if we run a program without resetting the ESP it will already be 19200
-                                    // and hence the next command will not be understood or executed
-//  ESPserial.println("AT+UART_CUR=19200,8,1,0,0\r\n") ;
-//  ESPserial.end() ;
-//  delay(10) ;                         // Necessary to allow for baud rate changes
-//  ESPserial.begin(19200) ;            // start again at a resonable baud rate
   Display.gfx_ScreenMode(PORTRAIT) ; // change manually if orientation change
   // put your setup code here, to run once:
 
@@ -165,9 +133,10 @@ void setup()
   Display.txt_Height(1);
   Display.gfx_MoveTo(0,0) ;
   Display.putstr("Here we have an instruction related to dialysis. Yay! What fun.") ;      
-  Display.putstr(strings[0]);// Start with LED OFF
+  Display.putstr(pages[0].text );// Start with LED OFF
   byte state ;
   goHome();
+  
   state = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
   //-----------------------------------------------------------------------------------------
   if((state == TOUCH_PRESSED) || (state == TOUCH_MOVING))                       // if there's a press, or it's moving
@@ -175,45 +144,89 @@ void setup()
     x = Display.touch_Get(TOUCH_GETX);
     y = Display.touch_Get(TOUCH_GETY);
   }
-  page = 0;
+  pageNum = 0;
 
 } // end Setup **do not alter, remove or duplicate this line**
 
 
-void showPage(int page)
+void showPage(int pageNum)
 {
   Display.gfx_Cls();   // clear screen
-  Display.putstr(strings[page]) ;
+  Display.putstr(pages[pageNum].text) ;
   Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
   Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
   Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
-  int v1 = getNumber();
-  int v2 = getNumber();
-  Serial.print(v1 + v2);
-  Serial.print(v1 * v2);
+  //int v1 = getNumber();
+  //int v2 = getNumber();
+  //Display.putstr(("v1 %d\n", v1));
+  //Display.putstr(("v2 %d\n", v2));
+  //int v3 = v1 + v2;
+  //Display.putstr(("add %d", v3));
+  //Serial.print(v1 * v2);
 }
 
-int getNumber()
+double exponentiate(double x, int y)
 {
-   char key = kpd.getKey();
-   int num = 0;
-   if(key)
+  double num = x;
+  while (y > 1)
+  {
+     num = num * x;
+     y--; 
+  }
+  return num;
+  Serial.print(num);
+}
+
+double getNumber(char key)
+{
+   double num = 0;
+   int postDecVal = 0; // tracks whether we have added a decimal point yet, and how far along we are
+
+   while (key != "D")
    {
-      switch (key) 
+      //Serial.print("in GetNumber\n");
+      Serial.print(key);
+      if(key)
       {
-         case NO_KEY:
-            break;
-         case '0': case '1': case '2': case '3': case '4':
-         case '5': case '6': case '7': case '8': case '9':
-            Display.putstr(key);
-            num = num * 10 + (key - '0');
-            break;
-         case '*': case '#': case 'A': case 'B': case 'C': case 'D':
-            return num;
-            break;
+         switch (key) 
+         {
+            case NO_KEY:
+               break;
+            case '0': case '1': case '2': case '3': case '4':
+            case '5': case '6': case '7': case '8': case '9':
+            {
+               if (postDecVal > 0)
+               {
+                  Serial.print("\n yo yo");
+                  double decimalBit = exponentiate(0.1, postDecVal);
+                  Serial.println(decimalBit);
+                  num = num + ((key - '0') * exponentiate(0.1, postDecVal));
+                  postDecVal++;
+               }
+               else 
+                  num = num * 10 + (key - '0');
+               char stuff[] = {key, '\0'};
+               Display.putstr(stuff); 
+               break;
+            }
+            case '.': 
+               postDecVal++;
+               Serial.print("\n decimal point registered");
+               Serial.print(postDecVal);
+               Display.putstr(".");
+               break;
+            case '#': case 'A': case 'B': case 'C': case 'D':
+               return num;
+               break;
+         }
+         Serial.print("This is our number: ");
+         Serial.print(num);
       }
+      key = kpd.getKey();
    }
+//   Serial.print(num);
    return num;
+   return 0;
 }
 
 void loop()
@@ -224,7 +237,17 @@ void loop()
    byte buttonState3 = digitalRead(BUTTON3);
    byte buttonState4 = digitalRead(BUTTON4);
 
+   double v1 = 0;
+   if (pages[pageNum].acceptsInput)
+   {
+      char key = kpd.getKey();
+      v1 = getNumber(key);
+      Serial.print("hello!\n");
+      Serial.print(v1);
+   }
 
+   //so, touchscreen won't work on a page where the keypad is activated... Intersting. Not sure HOW worth it it would be to debug this, since we're dispensing with the touchpad soon anyway.
+   //what happens if user accidently hits a letter while entering a number (right now it resets so they have to start again, but that's not terribly clear)
    touchState = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
   //-----------------------------------------------------------------------------------------
   if((touchState == TOUCH_PRESSED) || (touchState == TOUCH_MOVING))                       // if there's a press, or it's moving
@@ -236,12 +259,12 @@ void loop()
   //-----------------------------------------------------------------------------------------
   if (!inHomePage)
   {
-     /* if(touchState == TOUCH_RELEASED)                      // if there's a release
+      if(touchState == TOUCH_RELEASED)                      // if there's a release
      {
         if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
         {
-           goBack(page);
-           showPage(page);
+           goBack(pageNum);
+           showPage(pageNum);
         }
         else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
         {
@@ -249,11 +272,11 @@ void loop()
         }
         else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
         {
-           goNext(page);
-           showPage(page);
+           goNext(pageNum);
+           showPage(pageNum);
         }
-     } */
-     if (buttonState1 == HIGH) 
+     } 
+    /* if (buttonState1 == HIGH) 
      {
          goBack(page);
          showPage(page);
@@ -270,7 +293,7 @@ void loop()
      else if (buttonState4 == HIGH) 
      {
          goHome();
-     }
+     }*/
   }
   else
   {
@@ -285,20 +308,20 @@ void loop()
   }
 }
 
-void goNext(int &page) 
+void goNext(int &pageNum) 
 {  
   //BstateNext = !BstateNext ;
-  if ((page == 0) || (strings[page + 1] != NULL ))
-     page++;
-  Serial.print(page);
+  if ((pageNum == 0) || (pageNum != 4)) // this way of checking wheter we've reached the end is hacky
+     pageNum++;
+  Serial.print(pageNum);
 }
 
-void goBack(int &page) 
+void goBack(int &pageNum) 
 {
   //BstateBack = !BstateBack ;
-  if (page != 0)
-     page--;
-  Serial.print(page);
+  if (pageNum != 0)
+     pageNum--;
+  Serial.print(pageNum);
 }
 
 void getHelp() 
