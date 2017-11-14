@@ -13,10 +13,10 @@
 
 #define DisplaySerial Serial1
 
-
 #include "Picaso_Serial_4DLib.h"
 #include "Picaso_Const4D.h"
 #include "Keypad.h"
+#include "Math.h"
 
 
 Picaso_Serial_4DLib Display(&DisplaySerial);
@@ -28,6 +28,7 @@ Picaso_Serial_4DLib Display(&DisplaySerial);
 #define buttonPin2   11 
 #define buttonPin3   12  
 #define buttonPin4   13 
+
 
 const char *helpText = "Do you need help?"; 
 const char *homeText = "Welcome to your in-home dialysis buddy!"; 
@@ -42,6 +43,7 @@ char keys[ROWS][COLS] = {
 };
 byte rowPins[ROWS] = { 2, 3, 4, 5 };
 byte colPins[COLS] = { 6, 7, 8, 9 }; 
+int NUM_PAGES = 6; // can't define an array with a variable though... shucks
 
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
@@ -49,12 +51,15 @@ struct Page
 {
   char *text;
   boolean acceptsInput;
+  double inputVal; // yup, cuz the way we've designed it there's only one per page, yeah?
 };
 
-Page pages[4] = {{"This is dialysis instruction 1. Insert the cartridge.", false},
-                 {"This is dialysis instruction 2. Snap and tap.", false},
-                 {"This is dialysis instruction 3. Cannulate.", false},
-                 {"Enter the patient's weight: \n", true}};
+Page pages[6] = {{"This is dialysis instruction 1. Insert the cartridge.", false, NULL},
+                 {"This is dialysis instruction 2. Snap and tap.", false, NULL},
+                 {"This is dialysis instruction 3. Cannulate.", false, NULL},
+                 {"Enter the patient's weight (in pounds) and press Enter (D): \n", true, NULL},
+                 {"Enter the patient's height (in inches) and press Enter (D): \n", true, NULL},
+                 {"The patient's body mass index (BMI) is: \n", false, NULL}};
  
 void nextpage(int ErrCode, unsigned char Errorbyte)
 {
@@ -148,11 +153,100 @@ void setup()
 
 } // end Setup **do not alter, remove or duplicate this line**
 
+double calculateBMI()
+{
+  double weight = pages[3].inputVal;
+  double height = pages[4].inputVal;
+  double bmi = 703 *  weight / (height * height);
+  return bmi;
+}
 
-void showPage(int pageNum)
+void double2string(char *number, double n)
+{
+   char integers[6] = {'0','0','0','0','0','0'};
+   char fractions[6] = {'0','0','0','0','0','0'};
+   int i = 5; //related to that length... we'll work it out... CODE CODE CODE!
+   double integral; // this is, numerically, the integer part
+   double fractional = modf(n, &integral);
+   int integralI = (int)integral; //this is TERRIBLE code. Please just let it work for now.
+   while (integralI > 0)
+   {
+      integers[i] = ((int)fmod(integralI,10)) + '0';
+      integralI=integralI/10;
+      i--;
+   }
+   int k = 0;
+   int q = 5 - i;
+  // Serial.print("fractional\n");
+  // Serial.print(fractional);
+   while (q > 0)
+   {
+       fractional = fractional * 10;
+       //Serial.print(floor(fractional));
+       //Serial.print((int)floor(fractional));
+       fractions[k] = ((int)floor(fractional)) + '0';
+       fractional = fmod(fractional,1);
+       k++;
+       q--;
+   }
+   //WHY DOES PRINTING TO SERIAL MATTER FOR THE DISPLAY AAAAAH
+   //Serial.print("integers\n");
+   //Serial.print(integers);
+  // Serial.print("fractions\n");
+  // Serial.print(fractions);
+  // Serial.print("\n");
+   int j = 0; // the length of the final array
+   while ((j < 6) && (i < 6))
+   {
+      number[j] = integers[i+1];
+      j++;
+      i++;
+   }
+   if (j != 6)
+   {
+      number[j-1] = '.';
+      j++;
+   }
+   j--;
+   int p = 0;
+   while ((j < 6) && (p < 6)) 
+   {
+      number[j] = fractions[p];
+      j++;
+      p++;  
+   }
+   
+   //while 
+   //int fractionalI = (int)(fractional * exponentiate(10, potentialFractionalSize)
+  /* Serial.print(number[0]);
+   Serial.print("Davey\n");
+      Serial.print(number[1]);
+   Serial.print("Davey\n");
+      Serial.print(number[2]);
+   Serial.print("Davey\n");
+      Serial.print(number[3]);
+   Serial.print("Davey\n");
+      Serial.print(number[4]);
+   Serial.print("Davey\n");
+      Serial.print(number[5]);
+   Serial.print("Davey\n"); */
+   return number;
+}
+
+void showPage(int pageNum, double val)
 {
   Display.gfx_Cls();   // clear screen
   Display.putstr(pages[pageNum].text) ;
+  if (val != (double)NULL)
+  {
+     Serial.print("Davey");
+     //char value[] = {val, '\0'};
+     //Serial.print(value);
+     char answer[] = {'0','0','0','0','0','0'};
+     double2string(answer, val);
+     Serial.print(answer);
+     Display.putstr(answer);
+  }
   Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
   Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
   Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
@@ -165,7 +259,7 @@ void showPage(int pageNum)
   //Serial.print(v1 * v2);
 }
 
-double exponentiate(double x, int y)
+double exponentiate(double x, int y) //this exists in the math library already... remove later
 {
   double num = x;
   while (y > 1)
@@ -174,7 +268,7 @@ double exponentiate(double x, int y)
      y--; 
   }
   return num;
-  Serial.print(num);
+  //Serial.print(num);
 }
 
 double getNumber(char key)
@@ -205,8 +299,8 @@ double getNumber(char key)
                }
                else 
                   num = num * 10 + (key - '0');
-               char stuff[] = {key, '\0'};
-               Display.putstr(stuff); 
+               char value[] = {key, '\0'};
+               Display.putstr(value); 
                break;
             }
             case '.': 
@@ -224,9 +318,9 @@ double getNumber(char key)
       }
       key = kpd.getKey();
    }
-//   Serial.print(num);
+   Serial.print(pageNum);
    return num;
-   return 0;
+
 }
 
 void loop()
@@ -238,13 +332,32 @@ void loop()
    byte buttonState4 = digitalRead(BUTTON4);
 
    double v1 = 0;
+   
    if (pages[pageNum].acceptsInput)
    {
+      //Serial.print(pageNum);
       char key = kpd.getKey();
-      v1 = getNumber(key);
-      Serial.print("hello!\n");
-      Serial.print(v1);
+      pages[pageNum].inputVal = getNumber(key);
+      goNext(pageNum);
+      Serial.print(pageNum);
+      if (pageNum == 5) //THIS IS MEGA HACKY, WE WILL NOT DO THIS IN THE ACTUAL PROGRAM
+      {
+         double bmi = calculateBMI();
+         Serial.print("calculating BMI");
+         showPage(pageNum, bmi);
+      }
+      else
+         showPage(pageNum, NULL);
+      //Serial.print("hello!\n");
+      //Serial.print(pageNum);
    }
+   /*if (pageNum == 5)
+   {
+      double bmi = calculateBMI();
+      Serial.print(bmi);
+      showPage(pageNum, bmi);*/
+     //Serial.print(pageNum);
+     //am I supposd to be worrying about malloc and calloc here...?
 
    //so, touchscreen won't work on a page where the keypad is activated... Intersting. Not sure HOW worth it it would be to debug this, since we're dispensing with the touchpad soon anyway.
    //what happens if user accidently hits a letter while entering a number (right now it resets so they have to start again, but that's not terribly clear)
@@ -264,7 +377,7 @@ void loop()
         if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
         {
            goBack(pageNum);
-           showPage(pageNum);
+           showPage(pageNum, NULL);
         }
         else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
         {
@@ -273,7 +386,7 @@ void loop()
         else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
         {
            goNext(pageNum);
-           showPage(pageNum);
+           showPage(pageNum, NULL);
         }
      } 
     /* if (buttonState1 == HIGH) 
@@ -301,7 +414,7 @@ void loop()
      {
         if ((x >= 80) && (x <= 140) && (y >= 100) && (y <= 130))     // Width=200 Height= 60
         {
-           showPage(0);
+           showPage(0, NULL);
            inHomePage = !inHomePage; 
         }
      }
@@ -311,7 +424,7 @@ void loop()
 void goNext(int &pageNum) 
 {  
   //BstateNext = !BstateNext ;
-  if ((pageNum == 0) || (pageNum != 4)) // this way of checking wheter we've reached the end is hacky
+  if ((pageNum == 0) || (pageNum != NUM_PAGES)) // this way of checking wheter we've reached the end is hacky
      pageNum++;
   Serial.print(pageNum);
 }
