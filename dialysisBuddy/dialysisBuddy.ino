@@ -13,18 +13,17 @@
 #include "Keypad.h"
 #include "Math.h"
 #include "page.h"
+#include "section.h"
 #include "calculations.h"
 #include "pageOperations.h"
 #include "buttons.h"
 #include "keyboard.h"
-#include "stdio.h"
 
 Picaso_Serial_4DLib Display(&DisplaySerial);
 
 // routine to handle Serial errors
 
 int NUM_PAGES = 6;
-//makePages();
 word x, y ;
 int pageNum = 0;
 void goNext(int & page) ;
@@ -48,7 +47,7 @@ void setup()
 
   pinMode(13, OUTPUT);
   Display.touch_Set(TOUCH_ENABLE);                            // enable the touch screen
-  
+//  makePages();
   byte state ;
   /*while (!Display.media_Init())
   {
@@ -59,20 +58,39 @@ void setup()
   }*/
   goHome();
   
-  state = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
+  /*state = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
   //-----------------------------------------------------------------------------------------
   if((state == TOUCH_PRESSED) || (state == TOUCH_MOVING))                       // if there's a press, or it's moving
   {
     x = Display.touch_Get(TOUCH_GETX);
     y = Display.touch_Get(TOUCH_GETY);
   }
-  pageNum = 0;
+  pageNum = 0;*/
 
 } // end Setup **do not alter, remove or duplicate this line**
 
 void loop()
 {  
-   byte touchState;
+   //byte touchState;
+   if (inHomePage)
+   {
+    //Serial.print("in home page");    
+    int menuChoice = kpd.getKey() - '0';
+    //Serial.print(menuChoice);
+    if (menuChoice > 0) 
+       goToSection(menuChoice);
+    //inHomePage = !inHomePage;
+    
+  /*  if(touchState == TOUCH_RELEASED)                      // if there's a release
+     {
+        if ((x >= 80) && (x <= 140) && (y >= 100) && (y <= 130))     // Width=200 Height= 60
+        {
+           showPage(0, NULL);
+           inHomePage = !inHomePage; 
+        }
+     }
+     */
+   }
    
    if (pages[pageNum].acceptsInput) // we're not going to need this anymore...
    {
@@ -99,29 +117,19 @@ void loop()
 
    //so, touchscreen won't work on a page where the keypad is activated... Intersting. Not sure HOW worth it it would be to debug this, since we're dispensing with the touchpad soon anyway.
    //what happens if user accidently hits a letter while entering a number (right now it resets so they have to start again, but that's not terribly clear)
-   touchState = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
+  /* touchState = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
   //-----------------------------------------------------------------------------------------
   if((touchState == TOUCH_PRESSED) || (touchState == TOUCH_MOVING))                       // if there's a press, or it's moving
   {
     x = Display.touch_Get(TOUCH_GETX);
     y = Display.touch_Get(TOUCH_GETY);
-  }
+  }*/
 
   readButtons(pageNum);
   delay(200) ; // I have qualms about this... let's return!!! 
 
   //-----------------------------------------------------------------------------------------
-  if (inHomePage)
-  {
-    if(touchState == TOUCH_RELEASED)                      // if there's a release
-     {
-        if ((x >= 80) && (x <= 140) && (y >= 100) && (y <= 130))     // Width=200 Height= 60
-        {
-           showPage(0, NULL);
-           inHomePage = !inHomePage; 
-        }
-     }
-  }
+  
   /*
       if(touchState == TOUCH_RELEASED)                      // if there's a release
      {

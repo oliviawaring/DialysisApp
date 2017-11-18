@@ -1,30 +1,58 @@
 extern int NUM_PAGES;
 extern Page pages[];
 extern Picaso_Serial_4DLib Display;
-//extern Picaso_Serial_4DLib Display(&DisplaySerial);
 const char *helpText = "Do you need help?"; 
-const char *homeText = "Welcome to your in-home dialysis buddy!"; 
+const char *homeText = "Welcome to your in-home dialysis buddy! Select from among the following options by pressing the corresponding number on your keypad:\n1. Setup\n2. Treatment\n3. Error Codes"; 
 word BstateBack = BUTTON_UP ;
 word BstateNext = BUTTON_UP ;
 word BstateHelp = BUTTON_UP ;
 
-/*Page makePages()
+/*
+void makePages()
 {
-    FILE *ifp;
-    char *mode = "r";
-    ifp = fopen("dialysisInstructions.txt", mode);
-    if (ifp == NULL) 
+    FILE *file;
+    char *myBuffer;
+    unsigned long fileLen;
+
+    file = fopen("dialysisInstructions.txt", "r");
+    if (!file) 
     {
-       fprintf(stderr, "Can't open input file in.list!\n");
+       fprintf(stderr, "Can't open input file\n");
        return;
     }
-    char line[72];
-    
-    fgets(line, 72)
-    while (fgets(line, 72, ifp) != NULL)
+
+    //Get file length
+    fseek(file, 0, SEEK_END);
+    fileLen = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    //Allocate memory
+    myBuffer = (char *)malloc(fileLen+1);
+    if (!myBuffer)
     {
-       if (line)
+       fprintf(stderr, "Memory error!");
+                                fclose(file);
+       return;
     }
+
+    //Read file contents into buffer
+    fread(myBuffer, fileLen, 1, file);
+    fclose(file);
+
+    for (int i=0; i < fileLen; i++)
+    {
+       //while(((char *)myBuffer)[i])
+       Serial.print(((char *)myBuffer)[i]);
+    }
+
+    //Do what ever with buffer
+
+    free(myBuffer);    
+   //fgets(line, 72)
+ //   while (fgets(line, 72, ifp) != NULL)
+ //   {
+ //      if (line)
+ //   }
 }*/
 
 Page pages[6] = {{"This is dialysis instruction 1. Insert the cartridge.", false, NULL},
@@ -34,6 +62,55 @@ Page pages[6] = {{"This is dialysis instruction 1. Insert the cartridge.", false
                  {"Enter the patient's height (in inches) and press Enter (D): \n", true, NULL},
                  {"The patient's body mass index (BMI) is: \n", false, NULL}};
 
+Section sections[3] = {{"Setup", NULL, NULL}, 
+                       {"Treatment", NULL, pages},
+                       {"Error Codes", NULL, NULL}};
+
+void showPage(int pageNum, double val)
+{
+  Display.gfx_Cls();   // clear screen
+  Display.putstr(pages[pageNum].text) ;
+  if (val != (double)NULL)
+  {
+     char answer[] = {'0','0','0','0','0','0'};
+     double2string(answer, val);
+     Serial.print(answer);
+     Display.putstr(answer);
+  }
+//  Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
+//  Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
+//  Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
+}
+                       
+void goToSection(int sectionNum)
+{
+   Serial.print("in go to section");
+   Serial.print(sectionNum);
+   switch (sectionNum) 
+   {
+      case 1:
+      {
+        //do stuff
+        break;
+      }
+      case 2:
+      {
+        showPage(0, NULL);
+        break;
+      }
+      case 3:
+      {
+        //do stuff
+        break;
+      }
+      default:
+      {
+        //do stuff
+        break;
+      }
+   }
+
+}
 
 void goNext(int &pageNum) 
 {  
@@ -67,18 +144,4 @@ void goHome()
   Display.gfx_Button(BstateBack, 80, 100, RED, BLACK, FONT3, 2, 2, "Start") ;
 }
 
-void showPage(int pageNum, double val)
-{
-  Display.gfx_Cls();   // clear screen
-  Display.putstr(pages[pageNum].text) ;
-  if (val != (double)NULL)
-  {
-     char answer[] = {'0','0','0','0','0','0'};
-     double2string(answer, val);
-     Serial.print(answer);
-     Display.putstr(answer);
-  }
-//  Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
-//  Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
-//  Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
-}
+
