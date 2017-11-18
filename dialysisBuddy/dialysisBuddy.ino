@@ -17,19 +17,14 @@
 #include "pageOperations.h"
 #include "buttons.h"
 #include "keyboard.h"
+#include "stdio.h"
 
 Picaso_Serial_4DLib Display(&DisplaySerial);
 
 // routine to handle Serial errors
 
 int NUM_PAGES = 6;
-Page pages[6] = {{"This is dialysis instruction 1. Insert the cartridge.", false, NULL},
-                 {"This is dialysis instruction 2. Snap and tap.", false, NULL},
-                 {"This is dialysis instruction 3. Cannulate.", false, NULL},
-                 {"Enter the patient's weight (in pounds) and press Enter (D): \n", true, NULL},
-                 {"Enter the patient's height (in inches) and press Enter (D): \n", true, NULL},
-                 {"The patient's body mass index (BMI) is: \n", false, NULL}};
-
+//makePages();
 word x, y ;
 int pageNum = 0;
 void goNext(int & page) ;
@@ -62,7 +57,7 @@ void setup()
      Display.putstr("Please insert SD card");
     //Display.pause(300);
   }*/
-  goHome(Display);
+  goHome();
   
   state = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
   //-----------------------------------------------------------------------------------------
@@ -79,7 +74,7 @@ void loop()
 {  
    byte touchState;
    
-   if (pages[pageNum].acceptsInput)
+   if (pages[pageNum].acceptsInput) // we're not going to need this anymore...
    {
       char key = kpd.getKey();
       pages[pageNum].inputVal = getNumber(key, Display);
@@ -89,10 +84,10 @@ void loop()
       {
          double bmi = calculateBMI(pages[3], pages[4]);
          Serial.print("calculating BMI");
-         showPage(pageNum, bmi, Display);
+         showPage(pageNum, bmi);
       }
       else
-         showPage(pageNum, NULL, Display);
+         showPage(pageNum, NULL);
    }
    /*if (pageNum == 5)
    {
@@ -112,40 +107,39 @@ void loop()
     y = Display.touch_Get(TOUCH_GETY);
   }
 
-  readButtons(); 
+  readButtons(pageNum);
+  delay(200) ; // I have qualms about this... let's return!!! 
 
   //-----------------------------------------------------------------------------------------
-  if (!inHomePage)
-  {
-      if(touchState == TOUCH_RELEASED)                      // if there's a release
-     {
-        if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
-        {
-           goBack(pageNum);
-           showPage(pageNum, NULL, Display);
-        }
-        else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
-        {
-           getHelp(Display);     
-        }
-        else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
-        {
-           goNext(pageNum);
-           showPage(pageNum, NULL, Display);
-        }
-     } 
-  }
-  else
+  if (inHomePage)
   {
     if(touchState == TOUCH_RELEASED)                      // if there's a release
      {
         if ((x >= 80) && (x <= 140) && (y >= 100) && (y <= 130))     // Width=200 Height= 60
         {
-           showPage(0, NULL, Display);
+           showPage(0, NULL);
            inHomePage = !inHomePage; 
         }
      }
   }
-  
+  /*
+      if(touchState == TOUCH_RELEASED)                      // if there's a release
+     {
+        if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
+        {
+           goBack(pageNum);
+           showPage(pageNum, NULL);
+        }
+        else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
+        {
+           getHelp();     
+        }
+        else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
+        {
+           goNext(pageNum);
+           showPage(pageNum, NULL);
+        }
+     } 
+     */
 }
 

@@ -5,7 +5,7 @@
 #define btnDOWN  4
 #define btnUP    5
 
-int readButtons(int &pageNum)
+int readButtons()
 {
  //Serial.print("in buttons");
  //int adc_key_in  = 0;
@@ -19,7 +19,6 @@ int readButtons(int &pageNum)
  if (adc_key_in < 190)   
  {
     Serial.print("help");
-    getHelp(pageNum);
     return btnHELP;   
  }
  if (adc_key_in < 333)  
@@ -34,16 +33,12 @@ int readButtons(int &pageNum)
  }
  if (adc_key_in < 618)
  {
-   Serial.print("down");
-   goNext(pageNum);
-   showPage(pageNum, NULL);
+    Serial.print("down");
    return btnDOWN; 
  }
  if (adc_key_in < 760)
  {
-   Serial.print("up");
-   goBack(pageNum);
-   showPage(pageNum, NULL);
+    Serial.print("up");
    return btnUP;   
  }  
 
