@@ -1,9 +1,15 @@
-double calculateBMI(Page page1, Page page2)
+double calculateBMI(double weight, double height)
 {
-  double weight = page1.inputVal;
-  double height = page2.inputVal;
+  //double weight = page1.inputVal;
+  //double height = page2.inputVal;
   double bmi = 703 *  weight / (height * height);
   return bmi;
+}
+
+double calculateUltraFiltrationRate(double current, double target, double hours)
+{
+   double ufRate = (current - target) / hours;
+   return ufRate;
 }
 
 double exponentiate(double x, int y) //this exists in the math library already... remove later

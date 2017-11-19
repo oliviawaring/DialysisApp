@@ -23,9 +23,9 @@ Picaso_Serial_4DLib Display(&DisplaySerial);
 
 // routine to handle Serial errors
 
-int NUM_PAGES = 6;
 word x, y ;
 int pageNum = 0;
+int sectionNum = 0;
 void goNext(int & page) ;
 void goBack(int & page) ;
 boolean inHomePage = true;
@@ -49,23 +49,14 @@ void setup()
   Display.touch_Set(TOUCH_ENABLE);                            // enable the touch screen
 //  makePages();
   byte state ;
-  /*while (!Display.media_Init())
+  while (!Display.media_Init())
   {
      Display.gfx_Cls();
-     //Display.pause(300);n
+     delay(300);
      Display.putstr("Please insert SD card");
-    //Display.pause(300);
-  }*/
-  goHome();
-  
-  /*state = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
-  //-----------------------------------------------------------------------------------------
-  if((state == TOUCH_PRESSED) || (state == TOUCH_MOVING))                       // if there's a press, or it's moving
-  {
-    x = Display.touch_Get(TOUCH_GETX);
-    y = Display.touch_Get(TOUCH_GETY);
+     delay(300);
   }
-  pageNum = 0;*/
+  goHome();
 
 } // end Setup **do not alter, remove or duplicate this line**
 
@@ -74,13 +65,24 @@ void loop()
    //byte touchState;
    if (inHomePage)
    {
-    //Serial.print("in home page");    
+    Serial.print("home!\n");
+    Serial.print(sectionNum);
+    Serial.print(pageNum);
     int menuChoice = kpd.getKey() - '0';
-    //Serial.print(menuChoice);
+    Serial.print(menuChoice);
     if (menuChoice > 0) 
+    {
        goToSection(menuChoice);
-    //inHomePage = !inHomePage;
-    
+       inHomePage = !inHomePage; //I DO NEED THIS SOMEWHERE
+    }
+   }
+
+  readButtons();
+  delay(200) ; // I have qualms about this... let's return!!! 
+
+}
+
+     
   /*  if(touchState == TOUCH_RELEASED)                      // if there's a release
      {
         if ((x >= 80) && (x <= 140) && (y >= 100) && (y <= 130))     // Width=200 Height= 60
@@ -90,9 +92,10 @@ void loop()
         }
      }
      */
-   }
+
+   //I have to rethink and redesign this... the whole pages and section thing... It's not going to work. I need to have sections as my superstructrue and reference specific pages from there. 
    
-   if (pages[pageNum].acceptsInput) // we're not going to need this anymore...
+  /* if (pages[pageNum].acceptsInput) // we're not going to need this anymore...
    {
       char key = kpd.getKey();
       pages[pageNum].inputVal = getNumber(key, Display);
@@ -102,11 +105,11 @@ void loop()
       {
          double bmi = calculateBMI(pages[3], pages[4]);
          Serial.print("calculating BMI");
-         showPage(pageNum, bmi);
+         showPage(sectionNum, pageNum, bmi);
       }
       else
-         showPage(pageNum, NULL);
-   }
+         showPage(sectionNum, pageNum, NULL);
+   }*/
    /*if (pageNum == 5)
    {
       double bmi = calculateBMI();
@@ -124,10 +127,6 @@ void loop()
     x = Display.touch_Get(TOUCH_GETX);
     y = Display.touch_Get(TOUCH_GETY);
   }*/
-
-  readButtons(pageNum);
-  delay(200) ; // I have qualms about this... let's return!!! 
-
   //-----------------------------------------------------------------------------------------
   
   /*
@@ -149,5 +148,5 @@ void loop()
         }
      } 
      */
-}
+
 

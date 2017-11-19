@@ -1,5 +1,6 @@
 const byte ROWS = 4; // Four rows
 const byte COLS = 4; // Four columns
+
 // Define the Keymap
 char keys[ROWS][COLS] = {
   {'1','2','3','A'},
