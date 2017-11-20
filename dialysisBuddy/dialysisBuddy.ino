@@ -1,9 +1,8 @@
-//
-// NB! This is a file generated from the .4Dino file, changes will be lost
-//     the next time the .4Dino file is built
-//
-// Define LOG_MESSAGES to a serial port to send SPE errors messages to. Do not use the same Serial port as SPE
-//#define LOG_MESSAGES Serial
+/*****************************************************************/
+/* dialysisBuddy.ino                                                      
+/* Author: MIT Dialysis Team, Fall 2017                                           
+/* The main dialysis buddy program    
+/* ***************************************************************/
 
 #define RESETLINE     30
 #define DisplaySerial Serial1
@@ -21,34 +20,32 @@
 
 Picaso_Serial_4DLib Display(&DisplaySerial);
 
-// routine to handle Serial errors
-
-word x, y ;
-int pageNum = 0;
-int sectionNum = 0;
+word x, y ; // Touchscreen coordinates (keeping this in case we need to resurrect the touchscreen later)
+int sectionNum = 0; // Global variable governing the section number; start at section "0".
+int pageNum = 0; // Global variable governing the page number of a given section; start at page "0".
+boolean inHomePage = true; // Tells us whether or not we're in the home page
 void goNext(int & page) ;
 void goBack(int & page) ;
-boolean inHomePage = true;
 
+// Prepare the 4duino for program deployment
 void setup()
 {
   pinMode(RESETLINE, OUTPUT);       // Display reset pin
   digitalWrite(RESETLINE, 1);       // Reset Display, using shield
-  delay(100);                       // wait for it to be recognised
+  delay(100);                       // Wait for it to be recognised
   digitalWrite(RESETLINE, 0);       // Release Display Reset, using shield
-  delay(4000) ;                     // give display time to startup
+  delay(4000) ;                     // Give display time to startup
 
-  // now start display as Serial lines should have 'stabilised'
+  // Start display as Serial lines should have 'stabilised'
   DisplaySerial.begin(200000) ;     // Hardware serial to Display, same as SPE on display is set to
   Display.TimeLimit4D = 5000 ;      // 5 second timeout on all commands
-
-  Display.gfx_ScreenMode(PORTRAIT) ; // change manually if orientation change
-  // put your setup code here, to run once:
-
+  
+  Display.gfx_ScreenMode(PORTRAIT) ; // change manually if orientation changes
   pinMode(13, OUTPUT);
   Display.touch_Set(TOUCH_ENABLE);                            // enable the touch screen
-//  makePages();
-  byte state ;
+  // makePages(); We might use this function later... 
+
+  // Initialize SD card
   while (!Display.media_Init())
   {
      Display.gfx_Cls();
@@ -60,93 +57,28 @@ void setup()
 
 } // end Setup **do not alter, remove or duplicate this line**
 
+// The main program loop
 void loop()
 {  
-   //byte touchState;
+   // Launch opening menu behavior
    if (inHomePage)
    {
-    Serial.print("home!\n");
-    Serial.print(sectionNum);
-    Serial.print(pageNum);
-    int menuChoice = kpd.getKey() - '0';
-    Serial.print(menuChoice);
-    if (menuChoice > 0) 
-    {
-       goToSection(menuChoice);
-       inHomePage = !inHomePage; //I DO NEED THIS SOMEWHERE
-    }
+      Serial.print("home!\n");
+      Serial.print(sectionNum);
+      Serial.print(pageNum);
+      int menuChoice = kpd.getKey() - '0';
+      Serial.print(menuChoice);
+      if (menuChoice > 0) 
+      {
+         goToSection(menuChoice);
+         inHomePage = !inHomePage; 
+      }
    }
-
-  readButtons();
-  delay(200) ; // I have qualms about this... let's return!!! 
-
+   
+  readButtons(); // Read button input
+  delay(200) ; 
 }
 
-     
-  /*  if(touchState == TOUCH_RELEASED)                      // if there's a release
-     {
-        if ((x >= 80) && (x <= 140) && (y >= 100) && (y <= 130))     // Width=200 Height= 60
-        {
-           showPage(0, NULL);
-           inHomePage = !inHomePage; 
-        }
-     }
-     */
 
-   //I have to rethink and redesign this... the whole pages and section thing... It's not going to work. I need to have sections as my superstructrue and reference specific pages from there. 
-   
-  /* if (pages[pageNum].acceptsInput) // we're not going to need this anymore...
-   {
-      char key = kpd.getKey();
-      pages[pageNum].inputVal = getNumber(key, Display);
-      goNext(pageNum);
-      Serial.print(pageNum);
-      if (pageNum == 5) //THIS IS MEGA HACKY, WE WILL NOT DO THIS IN THE ACTUAL PROGRAM
-      {
-         double bmi = calculateBMI(pages[3], pages[4]);
-         Serial.print("calculating BMI");
-         showPage(sectionNum, pageNum, bmi);
-      }
-      else
-         showPage(sectionNum, pageNum, NULL);
-   }*/
-   /*if (pageNum == 5)
-   {
-      double bmi = calculateBMI();
-      Serial.print(bmi);
-      showPage(pageNum, bmi);*/
-     //Serial.print(pageNum);
-     //am I supposd to be worrying about malloc and calloc here...?
-
-   //so, touchscreen won't work on a page where the keypad is activated... Intersting. Not sure HOW worth it it would be to debug this, since we're dispensing with the touchpad soon anyway.
-   //what happens if user accidently hits a letter while entering a number (right now it resets so they have to start again, but that's not terribly clear)
-  /* touchState = Display.touch_Get(TOUCH_STATUS);               // get touchscreen status
-  //-----------------------------------------------------------------------------------------
-  if((touchState == TOUCH_PRESSED) || (touchState == TOUCH_MOVING))                       // if there's a press, or it's moving
-  {
-    x = Display.touch_Get(TOUCH_GETX);
-    y = Display.touch_Get(TOUCH_GETY);
-  }*/
-  //-----------------------------------------------------------------------------------------
-  
-  /*
-      if(touchState == TOUCH_RELEASED)                      // if there's a release
-     {
-        if ((x >= 20) && (x <= 70) && (y >= 300) && (y <= 320))     // Width=200 Height= 60
-        {
-           goBack(pageNum);
-           showPage(pageNum, NULL);
-        }
-        else if ((x >= 100) && (x <= 150) && (y >= 300) && (y <= 320))
-        {
-           getHelp();     
-        }
-        else if ((x >= 180) && (x <= 210) && (y >= 300) && (y <= 320)) 
-        {
-           goNext(pageNum);
-           showPage(pageNum, NULL);
-        }
-     } 
-     */
 
 
