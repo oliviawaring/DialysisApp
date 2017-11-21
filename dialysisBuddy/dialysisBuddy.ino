@@ -13,18 +13,21 @@
 #include "Math.h"
 #include "page.h"
 #include "section.h"
+#include "errors.h"
+#include "session.h"
 #include "calculations.h"
+#include "keyboard.h"
 #include "pageOperations.h"
 #include "buttons.h"
-#include "keyboard.h"
-#include "errors.h"
 
 Picaso_Serial_4DLib Display(&DisplaySerial);
+//Keypad kpd;
 
 word x, y ; // Touchscreen coordinates (keeping this in case we need to resurrect the touchscreen later)
 int sectionNum = 0; // Global variable governing the section number; start at section "0".
 int pageNum = 0; // Global variable governing the page number of a given section; start at page "0".
 boolean inHomePage = true; // Tells us whether or not we're in the home page
+Session currentSession = {0, 0, 0, 0, {0, 0}, {0, 0}, {0, 0}, {0, 0}, 0, 0, 0, 0}; // Initialize the patient's current session values.
 
 // Prepare the 4duino for program deployment
 void setup()
@@ -39,9 +42,9 @@ void setup()
   DisplaySerial.begin(200000) ;     // Hardware serial to Display, same as SPE on display is set to
   Display.TimeLimit4D = 5000 ;      // 5 second timeout on all commands
   
-  Display.gfx_ScreenMode(PORTRAIT) ; // change manually if orientation changes
+  Display.gfx_ScreenMode(PORTRAIT); // change manually if orientation changes
   pinMode(13, OUTPUT);
-  Display.touch_Set(TOUCH_ENABLE);                            // enable the touch screen
+  Display.touch_Set(TOUCH_ENABLE); // enable the touch screen
   // makePages(); We might use this function later... 
 
   // Initialize SD card

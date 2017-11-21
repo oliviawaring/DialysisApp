@@ -1,6 +1,7 @@
 /**** keyboard.h ****/
 
 extern Picaso_Serial_4DLib Display;
+
 const byte ROWS = 4; // Four rows on our keypad
 const byte COLS = 4; // Four columns on our keypad 
 
@@ -24,7 +25,7 @@ double getNumber(char key)
    double num = 0;
    int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
 
-   while (key != "D")
+   while (key != "D") // we have to change this to a button press, eventually... dayum, that's going to be complicated
    {
       if(key)
       {
@@ -51,7 +52,13 @@ double getNumber(char key)
                postDecVal++;
                Display.putstr(".");
                break;
-            case '#': case 'A': case 'B': case 'C': case 'D':
+            case 'A': 
+               // this is going to have to read as green at some point...
+               break;
+            case 'B': 
+               // and this will eventually represent red... AAAH. 
+               break;
+            case '#': case 'C': case 'D':
                return num;
                break;
          }
@@ -60,3 +67,58 @@ double getNumber(char key)
    }
    return num;
 }
+
+ErrorCode getErrorCode(char key)
+{
+   ErrorCode ec = {'0', 0};
+   int num = 0;
+   boolean gotColor = false;
+   boolean gotNum = false;
+   while (key != "D") // we have to change this to a button press, eventually... dayum, that's going to be complicated
+   {
+      if(key)
+      {
+         switch (key) 
+         {
+            case NO_KEY:
+               break;
+            case '0': case '1': case '2': case '3': case '4':
+            case '5': case '6': case '7': case '8': case '9':
+            {
+               if (!gotColor)
+                  return ec; // Get out of the function entirely - need to try again (maybe there should actually be a subroutine asking for the color...
+               num = num * 10 + (key - '0');
+               char value[] = {key, '\0'};
+               Display.putstr(value); 
+               gotNum = !gotNum; 
+               break;
+            }
+            case 'A': 
+            {
+               if (gotColor)
+                  return ec; // too many color codes! 
+               ec.color = 'G'; // Green error code! 
+               gotColor = !gotColor;
+               break;
+            }
+            case 'B': 
+            {
+               if (gotColor)
+                  return ec; // too many color codes! 
+               ec.color = 'R'; // Red error code! 
+               gotColor = !gotColor;
+               break;
+            }
+            case '.': case '#': case 'C': case 'D':
+               return ec; // not valid! 
+               break;
+         }
+      }
+      key = kpd.getKey();
+   }
+   ec.num = num;
+   ec.complete = true;
+   return ec;
+}
+
+
