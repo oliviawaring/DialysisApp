@@ -1,7 +1,7 @@
-/**** calculations.h ****/
-
 double calculateBMI(double weight, double height)
 {
+  //double weight = page1.inputVal;
+  //double height = page2.inputVal;
   double bmi = 703 *  weight / (height * height);
   return bmi;
 }
@@ -23,15 +23,14 @@ double exponentiate(double x, int y) //this exists in the math library already..
   return num;
 }
 
-// This is a ridiculous function that should not be necesary but we'll figure it out
-void double2string(char *number, double n) 
+void double2string(char *number, double n)
 {
    char integers[6] = {'0','0','0','0','0','0'};
    char fractions[6] = {'0','0','0','0','0','0'};
-   int i = 5; // related to that length... we'll work it out... CODE CODE CODE!
+   int i = 5; //related to that length... we'll work it out... CODE CODE CODE!
    double integral; // this is, numerically, the integer part
    double fractional = modf(n, &integral);
-   int integralI = (int)integral; // this is TERRIBLE code. Please just let it work for now.
+   int integralI = (int)integral; //this is TERRIBLE code. Please just let it work for now.
    while (integralI > 0)
    {
       integers[i] = ((int)fmod(integralI,10)) + '0';
@@ -40,6 +39,8 @@ void double2string(char *number, double n)
    }
    int k = 0;
    int q = 5 - i;
+  // Serial.print("fractional\n");
+  // Serial.print(fractional);
    while (q > 0)
    {
        fractional = fractional * 10;
