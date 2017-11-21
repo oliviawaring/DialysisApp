@@ -1,5 +1,8 @@
-const byte ROWS = 4; // Four rows
-const byte COLS = 4; // Four columns
+/**** keyboard.h ****/
+
+extern Picaso_Serial_4DLib Display;
+const byte ROWS = 4; // Four rows on our keypad
+const byte COLS = 4; // Four columns on our keypad 
 
 // Define the Keymap
 char keys[ROWS][COLS] = {
@@ -8,19 +11,21 @@ char keys[ROWS][COLS] = {
   {'7','8','9','C'},
   {'.','0','#','D'}
 };
+
+// Connect the pins
 byte rowPins[ROWS] = { 2, 3, 4, 5 };
 byte colPins[COLS] = { 6, 7, 8, 9 }; 
 
+// Initialize the keypad
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
-double getNumber(char key, Picaso_Serial_4DLib Display)
+double getNumber(char key)
 {
    double num = 0;
-   int postDecVal = 0; // tracks whether we have added a decimal point yet, and how far along we are
+   int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
 
    while (key != "D")
    {
-      Serial.print(key);
       if(key)
       {
          switch (key) 
@@ -32,9 +37,7 @@ double getNumber(char key, Picaso_Serial_4DLib Display)
             {
                if (postDecVal > 0)
                {
-                  Serial.print("\n yo yo");
                   double decimalBit = exponentiate(0.1, postDecVal);
-                  Serial.println(decimalBit);
                   num = num + ((key - '0') * exponentiate(0.1, postDecVal));
                   postDecVal++;
                }
@@ -46,16 +49,12 @@ double getNumber(char key, Picaso_Serial_4DLib Display)
             }
             case '.': 
                postDecVal++;
-               Serial.print("\n decimal point registered");
-               Serial.print(postDecVal);
                Display.putstr(".");
                break;
             case '#': case 'A': case 'B': case 'C': case 'D':
                return num;
                break;
          }
-         Serial.print("This is our number: ");
-         Serial.print(num);
       }
       key = kpd.getKey();
    }

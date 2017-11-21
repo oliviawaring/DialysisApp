@@ -1,3 +1,5 @@
+/**** section.h ****/
+
 struct Section
 {
   char *title;
