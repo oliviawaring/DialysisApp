@@ -23,9 +23,6 @@ Page valuePages[4] = {{"Enter the patient's current weight (in kg) and press SEL
                       {"Enter the patient's target weight (in kg) and press SELECT: \n", true, NULL},
                       {"Enter the patient's treatment time (in hours) and press SELECT: \n", true, NULL},
                       {"End of treatment value input. Press back to return home.", false, NULL}};
-
-Page errorPages[2] = {{"Enter the error code (color and number) press SELECT: \n", true, NULL},
-                      {"End of error codes. Press back to return home.", false, NULL}};                      
   
 Section sections[NUM_SECTIONS] = {{"Record Treatment Values", 4, NULL, valuePages}, 
                        {"Setup", 4, NULL, setupPages},
