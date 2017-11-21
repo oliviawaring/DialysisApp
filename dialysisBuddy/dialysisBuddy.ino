@@ -17,6 +17,7 @@
 #include "pageOperations.h"
 #include "buttons.h"
 #include "keyboard.h"
+#include "errors.h"
 
 Picaso_Serial_4DLib Display(&DisplaySerial);
 
@@ -24,8 +25,6 @@ word x, y ; // Touchscreen coordinates (keeping this in case we need to resurrec
 int sectionNum = 0; // Global variable governing the section number; start at section "0".
 int pageNum = 0; // Global variable governing the page number of a given section; start at page "0".
 boolean inHomePage = true; // Tells us whether or not we're in the home page
-void goNext(int & page) ;
-void goBack(int & page) ;
 
 // Prepare the 4duino for program deployment
 void setup()
