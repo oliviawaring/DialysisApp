@@ -25,12 +25,12 @@ double getNumber(char key)
    double num = 0;
    int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
 
-   while (key != "D") // we have to change this to a button press, eventually... dayum, that's going to be complicated
+   while (key != 'D') // we have to change this to a button press, eventually... dayum, that's going to be complicated
    {
       if(key)
       {
          switch (key) 
-         {
+         {           
             case NO_KEY:
                break;
             case '0': case '1': case '2': case '3': case '4':
@@ -70,35 +70,44 @@ double getNumber(char key)
 
 ErrorCode getErrorCode(char key)
 {
-   ErrorCode ec = {'0', 0};
+   ErrorCode ec = {'0', 0, false};
    int num = 0;
    boolean gotColor = false;
-   boolean gotNum = false;
-   while (key != "D") // we have to change this to a button press, eventually... dayum, that's going to be complicated
+   int gotNum = 0;
+   while (key != 'D') // we have to change this to a button press, eventually... dayum, that's going to be complicated
    {
       if(key)
       {
+          Serial.print(key);
          switch (key) 
          {
+           
             case NO_KEY:
                break;
             case '0': case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
             {
-               if (!gotColor)
+               Serial.print("so confused");
+               if ((!gotColor) || (gotNum > 2))
+               {
+                  Serial.print("Bad");
                   return ec; // Get out of the function entirely - need to try again (maybe there should actually be a subroutine asking for the color...
+               }
+               Serial.print("safe");
                num = num * 10 + (key - '0');
                char value[] = {key, '\0'};
                Display.putstr(value); 
-               gotNum = !gotNum; 
+               gotNum++;
                break;
             }
             case 'A': 
             {
+               Serial.print("case A");
                if (gotColor)
                   return ec; // too many color codes! 
                ec.color = 'G'; // Green error code! 
                gotColor = !gotColor;
+               Display.putstr("Green ");
                break;
             }
             case 'B': 
@@ -107,6 +116,7 @@ ErrorCode getErrorCode(char key)
                   return ec; // too many color codes! 
                ec.color = 'R'; // Red error code! 
                gotColor = !gotColor;
+               Display.putstr("Red ");
                break;
             }
             case '.': case '#': case 'C': case 'D':
@@ -116,6 +126,7 @@ ErrorCode getErrorCode(char key)
       }
       key = kpd.getKey();
    }
+   Serial.print("did i leave?");
    ec.num = num;
    ec.complete = true;
    return ec;

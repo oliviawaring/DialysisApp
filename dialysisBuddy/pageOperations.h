@@ -16,6 +16,7 @@ const int NUM_SECTIONS = 3; // These are numbered in the way that makes sense to
 const int SETUP = 1;
 const int VALUES = 2;
 const int ERRORS = 3;
+int inErrors = false;
 
 extern Session currentSession;
 extern Error errorDictionary[4];
@@ -36,7 +37,7 @@ Page errorPages[2] = {{"Enter the error code (color and number) press SELECT: \n
   
 Section sections[NUM_SECTIONS] = {{"Record Treatment Values", 4, NULL, valuePages}, 
                        {"Setup", 4, NULL, setupPages},
-                       {"Error Codes", 2, NULL, NULL}};
+                       {"Error Codes", 2, NULL, errorPages}};
 
 void goHome() 
 {
@@ -80,14 +81,22 @@ void showPage()
   Serial.print(pageNum);
   Section thisSection = sections[sectionNum-1];
   Page thisPage = thisSection.pages[pageNum-1];
-  Serial.print(thisPage.text);
-  Display.putstr(thisPage.text); // print the relevant text
+  if (inErrors)
+  {
+      Error thisErrorPage = errorDictionary[pageNum-1];
+      Display.putstr(thisErrorPage.errorText);
+  }
+  else 
+  {  
+      Display.putstr(thisPage.text); // print the relevant text
+  }
   
   if (thisPage.acceptsInput)
    {
       char key = kpd.getKey();
       // wait a sec. I'm concerned. this is DEFINITELY not going to work. What am I doing here. This is only one key, yo. 
       // but some variation on this theme did work before.... 
+      Serial.print(sectionNum);
       switch(sectionNum)
       {
          case SETUP: 
@@ -114,6 +123,7 @@ void showPage()
          }
          case ERRORS: 
          {
+            Serial.print("in errors!\n");
             ErrorCode errorCode = getErrorCode(key);
             if (!errorCode.complete)
             {
@@ -127,11 +137,13 @@ void showPage()
             int i;
             for (i = 0; i < NUM_ERRORS; i++)
             {
+               Serial.print("hi we're happy");
                Error thisError = errorDictionary[i];
                ErrorCode thisCode = thisError.errorCode;
                if ((thisCode.color == color) && (thisCode.num == num))
                {
                   pageNum = thisError.page; // But going back should bring you back to the search page, NOT the previous error in the dictionary
+                  inErrors = true;
                   showPage();
                   break;
                }
@@ -176,48 +188,6 @@ void goToSection(int section)
       showPage();
    }
 }
-
-<<<<<<< HEAD
-void goHome() 
-{
-  Display.gfx_Cls();   // clear screen
-  Display.putstr(homeText) ;
-  pageNum = 0;
-  inHomePage = true;
-}
-
-//need to put checks in place so you can't "NEXT" when you've reached the end of a section
-//MAKE SURE YOU DON'T HAVE AN OFF BY ONE ERROR IN YOUR SECTION AND PAGE NUMBERS
-void goNext(int &pageNum) 
-{  
-  Serial.print("\n in goNext: ");
-  Serial.print(pageNum);
-  Serial.print(sectionNum);
-  if (pageNum != sections[sectionNum-1].numPages)
-     pageNum++;
-}
-
-void goBack(int &pageNum) 
-{
-  if (pageNum > 1)
-     pageNum--;
-  else
-  {
-     goHome(); // If you back too far out of a section, you should get back to the home screen.
-  }
-}
-
-void getHelp(int &pageNum) 
-{
-  goNext(pageNum);
-  Display.gfx_Cls();   // clear screen
-  Display.putstr(helpText) ;
-  //Display.gfx_Button(BstateBack, 0, 100, RED, BLACK, FONT3, 2, 2, "Dial Clinician") ;
-}
-=======
->>>>>>> parent of ae8b8f4... Revert "Fleshing out error code search architecture"
-
-
 
 
 /*
