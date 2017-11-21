@@ -30,9 +30,13 @@ Section sections[NUM_SECTIONS] = {{"Record Treatment Values", 4, NULL, valuePage
 
 void showPage()
 {
+  Serial.print("in show page\n");
   Display.gfx_Cls();   // clear screen
+  Serial.print(sectionNum);
+  Serial.print(pageNum);
   Section thisSection = sections[sectionNum-1];
   Page thisPage = thisSection.pages[pageNum-1];
+  Serial.print(thisPage.text);
   Display.putstr(thisPage.text); // print the relevant text
   /*
   if (thisPage.acceptsInput)
@@ -66,9 +70,13 @@ void showPage()
 void goToSection(int section)
 {
    pageNum = 1; // Reset the global page number to 1, since we're starting at the beginning of a section.
+   Serial.print(section);
    if (section <= NUM_SECTIONS)
    {
       sectionNum = section;
+      Serial.print("\ntesting");
+      Serial.print(sectionNum);
+      Serial.print("\n");
       showPage();
    }
 }
@@ -85,6 +93,9 @@ void goHome()
 //MAKE SURE YOU DON'T HAVE AN OFF BY ONE ERROR IN YOUR SECTION AND PAGE NUMBERS
 void goNext(int &pageNum) 
 {  
+  Serial.print("\n in goNext: ");
+  Serial.print(pageNum);
+  Serial.print(sectionNum);
   if (pageNum != sections[sectionNum-1].numPages)
      pageNum++;
 }
