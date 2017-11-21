@@ -1,17 +1,15 @@
 /**** calculations.h ****/
 
-extern Session currentSession;
-
 double calculateBMI(double weight, double height)
 {
   double bmi = 703 *  weight / (height * height);
   return bmi;
 }
 
-void calculateUltraFiltrationRate()
+double calculateUltraFiltrationRate(double current, double target, double hours)
 {
-   double ufRate = (currentSession.currentWeight - currentSession.targetWeight) / currentSession.treatmentTime;
-   currentSession.ufRate = ufRate;
+   double ufRate = (current - target) / hours;
+   return ufRate;
 }
 
 double exponentiate(double x, int y) //this exists in the math library already... remove later

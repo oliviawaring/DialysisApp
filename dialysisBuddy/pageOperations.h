@@ -7,18 +7,11 @@
 extern int sectionNum;
 extern int pageNum;
 extern boolean inHomePage;
-extern Keypad kpd;
 extern Picaso_Serial_4DLib Display;
 
 const char *helpText = "Do you need help?"; 
 const char *homeText = "Welcome to your in-home dialysis buddy! Select from among the following options by pressing the corresponding number on your keypad:\n1. Setup\n2. Treatment\n3. Error Codes"; 
 const int NUM_SECTIONS = 3; // These are numbered in the way that makes sense to humans. We will have to compensate for array indexing in code. 
-const int SETUP = 1;
-const int VALUES = 2;
-const int ERRORS = 3;
-
-extern Session currentSession;
-extern Error errorDictionary[4];
 
 // The text associated with pages and sections get defined here. (This is not ideal... But reading in strings from an external text file is proving to be prohibitievely complicated. Stay tuned.)
 Page setupPages[4] = {{"This is dialysis instruction 1. Insert the cartridge.", false, NULL},
@@ -32,11 +25,56 @@ Page valuePages[4] = {{"Enter the patient's current weight (in kg) and press SEL
                       {"End of treatment value input. Press back to return home.", false, NULL}};
 
 Page errorPages[2] = {{"Enter the error code (color and number) press SELECT: \n", true, NULL},
-                      {"Error code not found. Please try again. The correct format of an error code is a color (A for green, B for red) followed by an integer.", true, NULL}};                      
+                      {"End of error codes. Press back to return home.", false, NULL}};                      
   
 Section sections[NUM_SECTIONS] = {{"Record Treatment Values", 4, NULL, valuePages}, 
                        {"Setup", 4, NULL, setupPages},
                        {"Error Codes", 2, NULL, NULL}};
+
+void showPage()
+{
+  Display.gfx_Cls();   // clear screen
+  Section thisSection = sections[sectionNum-1];
+  Page thisPage = thisSection.pages[pageNum-1];
+  Display.putstr(thisPage.text); // print the relevant text
+  /*
+  if (thisPage.acceptsInput)
+   {
+      char key = kpd.getKey();
+      thisPage.inputVal = getNumber(key);
+      goNext(pageNum);
+      Serial.print(pageNum);
+      if (pageNum == 5) //THIS IS MEGA HACKY, WE WILL NOT DO THIS IN THE ACTUAL PROGRAM
+      {
+         double bmi = calculateBMI(pages[3], pages[4]);
+         Serial.print("calculating BMI");
+         showPage(sectionNum, pageNum, bmi);
+      }
+      else
+         showPage(sectionNum, pageNum, NULL);
+  }
+  if (val != (double)NULL)
+  {
+     char answer[] = {'0','0','0','0','0','0'};
+     double2string(answer, val);
+     Serial.print(answer);
+     Display.putstr(answer);
+  }*/
+  
+//  Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
+//  Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
+//  Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
+}
+                       
+void goToSection(int section)
+{
+   pageNum = 1; // Reset the global page number to 1, since we're starting at the beginning of a section.
+   if (section <= NUM_SECTIONS)
+   {
+      sectionNum = section;
+      showPage();
+   }
+}
 
 void goHome() 
 {
@@ -71,104 +109,6 @@ void getHelp(int &pageNum)
   Display.putstr(helpText) ;
   //Display.gfx_Button(BstateBack, 0, 100, RED, BLACK, FONT3, 2, 2, "Dial Clinician") ;
 }
-
-void showPage()
-{
-  Display.gfx_Cls();   // clear screen
-  Section thisSection = sections[sectionNum-1];
-  Page thisPage = thisSection.pages[pageNum-1];
-  Display.putstr(thisPage.text); // print the relevant text
-  
-  if (thisPage.acceptsInput)
-   {
-      char key = kpd.getKey();
-      // wait a sec. I'm concerned. this is DEFINITELY not going to work. What am I doing here. This is only one key, yo. 
-      // but some variation on this theme did work before.... 
-      switch(sectionNum)
-      {
-         case SETUP: 
-            //woah! why are you here? There shouldn't be any inputs in this section!  
-            break;
-         case VALUES:
-         {
-            switch (pageNum)
-            {
-               case 1:
-                  currentSession.currentWeight = getNumber(key);
-                  break;
-               case 2:
-                  currentSession.targetWeight = getNumber(key);
-                  break;
-               case 3:
-                  currentSession.treatmentTime = getNumber(key);
-                  break;
-              default: 
-                  if (currentSession.treatmentTime != 0)
-                     calculateUltraFiltrationRate();
-                  break;
-            } 
-         }
-         case ERRORS: 
-         {
-            ErrorCode errorCode = getErrorCode(key);
-            if (!errorCode.complete)
-            {
-               pageNum = 2;
-               showPage();
-               break;
-            }
-            // we need some sort of routine to extract the color and the number...
-            char color = errorCode.color;
-            int num = errorCode.num;
-            int i;
-            for (i = 0; i < NUM_ERRORS; i++)
-            {
-               Error thisError = errorDictionary[i];
-               ErrorCode thisCode = thisError.errorCode;
-               if ((thisCode.color == color) && (thisCode.num == num))
-               {
-                  pageNum = thisError.page; // But going back should bring you back to the search page, NOT the previous error in the dictionary
-                  showPage();
-                  break;
-               }
-            }
-            break;
-         }
-      }
-      /*goNext(pageNum);
-      Serial.print(pageNum);
-      if (pageNum == 5) //THIS IS MEGA HACKY, WE WILL NOT DO THIS IN THE ACTUAL PROGRAM
-      {
-         double bmi = calculateBMI(pages[3], pages[4]);
-         Serial.print("calculating BMI");
-         showPage(sectionNum, pageNum, bmi);
-      }
-      else
-         showPage(sectionNum, pageNum, NULL);*/
-  }
-  /*if (val != (double)NULL)
-  {
-     char answer[] = {'0','0','0','0','0','0'};
-     double2string(answer, val);
-     Serial.print(answer);
-     Display.putstr(answer);
-  }*/
-  
-//  Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
-//  Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
-//  Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
-}
-                       
-void goToSection(int section)
-{
-   pageNum = 1; // Reset the global page number to 1, since we're starting at the beginning of a section.
-   if (section <= NUM_SECTIONS)
-   {
-      sectionNum = section;
-      showPage();
-   }
-}
-
 
 
 
