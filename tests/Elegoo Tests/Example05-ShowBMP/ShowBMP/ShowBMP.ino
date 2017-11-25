@@ -61,9 +61,9 @@ int __Gnfile_num = 5;                           // num of file
 
 char __Gsbmp_files[5][FILENAME_LEN] =           // add file name here
 {
+"domegnome.bmp",
+"AnxietyWeekly.bmp",
 "flower.bmp",
-"tiger.bmp",
-"tree.bmp",
 "RedRose.bmp",
 "Penguins.bmp"
 };
