@@ -17,7 +17,8 @@ const int SETUP = 1;
 const int VALUES = 2;
 const int ERRORS = 3;
 int inErrors = false;
-
+char *currentText = "";
+ 
 extern Session currentSession;
 extern Error errorDictionary[4];
 
@@ -45,6 +46,30 @@ void goHome()
   Display.putstr(homeText) ;
   pageNum = 0;
   inHomePage = true;
+}
+
+void loadPage()
+{
+
+  // if the file is available, write to it:
+  File myFile = SD.open("test.txt");
+  if (myFile) 
+  {
+    Serial.println("test.txt:");
+    // read from the file until there's nothing else in it:
+    while (myFile.available()) {
+       //Serial.write(statusFile.read());
+       currentText = currentText + (char)myFile.read();
+    } 
+    // close the file:
+    myFile.close();
+  } 
+  else 
+  {
+    // if the file didn't open, print an error:
+    Serial.println("error opening test.txt");
+  }
+  
 }
 
 //need to put checks in place so you can't "NEXT" when you've reached the end of a section
@@ -88,7 +113,8 @@ void showPage()
   }
   else 
   {  
-      Display.putstr(thisPage.text); // print the relevant text
+      Display.putstr(currentText); // print the relevant text
+      currentText = "";
   }
   
   if (thisPage.acceptsInput)

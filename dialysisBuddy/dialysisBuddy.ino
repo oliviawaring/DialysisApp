@@ -9,6 +9,8 @@
 
 #include "Picaso_Serial_4DLib.h"
 #include "Picaso_Const4D.h"
+#include <SPI.h>
+#include <SD.h>
 #include "Keypad.h"
 #include "Math.h"
 #include "page.h"
@@ -55,6 +57,7 @@ void setup()
      Display.putstr("Please insert SD card");
      delay(300);
   }
+  
   goHome();
 
 } // end Setup **do not alter, remove or duplicate this line**
