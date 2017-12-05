@@ -8,7 +8,7 @@ extern int sectionNum;
 extern int pageNum;
 extern boolean inHomePage;
 extern Keypad kpd;
-extern Picaso_Serial_4DLib Display;
+//extern Picaso_Serial_4DLib Display;
 
 const char *helpText = "Do you need help?"; 
 const char *homeText = "Welcome to your in-home dialysis buddy! Select from among the following options by pressing the corresponding number on your keypad:\n1. Setup\n2. Treatment\n3. Error Codes"; 
@@ -42,8 +42,8 @@ Section sections[NUM_SECTIONS] = {{"Record Treatment Values", 4, NULL, valuePage
 
 void goHome() 
 {
-  Display.gfx_Cls();   // clear screen
-  Display.putstr(homeText) ;
+//  Display.gfx_Cls();   // clear screen
+ // Display.putstr(homeText) ;
   pageNum = 0;
   inHomePage = true;
 }
@@ -69,7 +69,6 @@ void loadPage()
     // if the file didn't open, print an error:
     Serial.println("error opening test.txt");
   }
-  
 }
 
 //need to put checks in place so you can't "NEXT" when you've reached the end of a section
@@ -93,15 +92,15 @@ void goBack(int &pageNum)
 void getHelp(int &pageNum) 
 {
   goNext(pageNum);
-  Display.gfx_Cls();   // clear screen
-  Display.putstr(helpText) ;
+//  Display.gfx_Cls();   // clear screen
+//  Display.putstr(helpText) ;
   //Display.gfx_Button(BstateBack, 0, 100, RED, BLACK, FONT3, 2, 2, "Dial Clinician") ;
 }
 
 void showPage()
 {
   Serial.print("in show page\n");
-  Display.gfx_Cls();   // clear screen
+//  Display.gfx_Cls();   // clear screen
   Serial.print(sectionNum);
   Serial.print(pageNum);
   Section thisSection = sections[sectionNum-1];
@@ -109,11 +108,11 @@ void showPage()
   if (inErrors)
   {
       Error thisErrorPage = errorDictionary[pageNum-1];
-      Display.putstr(thisErrorPage.errorText);
+//      Display.putstr(thisErrorPage.errorText);
   }
   else 
   {  
-      Display.putstr(currentText); // print the relevant text
+//      Display.putstr(currentText); // print the relevant text
       currentText = "";
   }
   

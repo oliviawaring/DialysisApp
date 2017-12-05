@@ -1,6 +1,6 @@
 /**** keyboard.h ****/
 
-extern Picaso_Serial_4DLib Display;
+//extern Picaso_Serial_4DLib Display;
 
 const byte ROWS = 4; // Four rows on our keypad
 const byte COLS = 4; // Four columns on our keypad 
@@ -45,12 +45,12 @@ double getNumber(char key)
                else 
                   num = num * 10 + (key - '0');
                char value[] = {key, '\0'};
-               Display.putstr(value); 
+//               Display.putstr(value); 
                break;
             }
             case '.': 
                postDecVal++;
-               Display.putstr(".");
+//               Display.putstr(".");
                break;
             case 'A': 
                // this is going to have to read as green at some point...
@@ -96,7 +96,7 @@ ErrorCode getErrorCode(char key)
                Serial.print("safe");
                num = num * 10 + (key - '0');
                char value[] = {key, '\0'};
-               Display.putstr(value); 
+//               Display.putstr(value); 
                gotNum++;
                break;
             }
@@ -107,7 +107,7 @@ ErrorCode getErrorCode(char key)
                   return ec; // too many color codes! 
                ec.color = 'G'; // Green error code! 
                gotColor = !gotColor;
-               Display.putstr("Green ");
+//               Display.putstr("Green ");
                break;
             }
             case 'B': 
@@ -116,7 +116,7 @@ ErrorCode getErrorCode(char key)
                   return ec; // too many color codes! 
                ec.color = 'R'; // Red error code! 
                gotColor = !gotColor;
-               Display.putstr("Red ");
+        //       Display.putstr("Red ");
                break;
             }
             case '.': case '#': case 'C': case 'D':
