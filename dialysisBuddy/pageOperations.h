@@ -22,8 +22,9 @@ const int COMMON = 5;
 const int ERRORS = 6;
 int inErrors = false;
 char *currentText = "";
-Page currentPage;
-Section currentSection;
+int currentPage = 0;
+int currentSection = 0;
+int currentSubSection = 0;
  
 extern Session currentSession;
 extern Error errorDictionary[4];
@@ -43,73 +44,59 @@ Page errorPages[2] = {{"Enter the error code (color and number) press SELECT: \n
                       {"Error code not found. Please try again. The correct format of an error code is a color (A for green, B for red) followed by an integer.", true, NULL}};                      
 */
 
-typedef struct Page Page;
+Page setup1 = {"setup1.bmp", false, NULL, 0};
+Page setup2 = {"setup2.bmp", false, NULL, 0};
+Page setup3 = {"setup3.bmp", false, NULL, 0};
+Page setup4 = {"setup4.bmp", false, NULL, 0};
+Page setup5 = {"setup5.bmp", false, NULL, 0};
+Page setup6 = {"setup6.bmp", false, NULL, 0};
+Page setup7 = {"setup7.bmp", false, NULL, 0};
+Page setup8 = {"setup8.bmp", false, NULL, 0};
 
-Page setup1 = {"setup1.bmp", NULL, NULL, false, NULL, 0};
-Page setup2 = {"setup2.bmp", NULL, &setup1, false, NULL, 0};
-Page setup3 = {"setup3.bmp", NULL, &setup2, false, NULL, 0};
-Page setup4 = {"setup4.bmp", NULL, &setup3, false, NULL, 0};
-Page setup5 = {"setup5.bmp", NULL, &setup4, false, NULL, 0};
-Page setup6 = {"setup6.bmp", NULL, &setup5, false, NULL, 0};
-Page setup7 = {"setup7.bmp", NULL, &setup6, false, NULL, 0};
-Page setup8 = {"setup8.bmp", NULL, &setup7, false, NULL, 0};
+Page prime1 = {"prime1.bmp", false, NULL, 0};
+Page connect1 = {"connect1.bmp", false, NULL, 0};
+Page settings1 = {"settings1.bmp", false, NULL, 0};
+Page launch1 = {"launch1.bmp", false, NULL, 0};
+Page end1 = {"end1.bmp", false, NULL, 0};
 
-setup7.next = setup8;
-setup6.next = setup7;
-setup5.next = setup6;
-setup4.next = setup5;
-setup3.next = setup4;
-setup2.next = setup3;
-setup1.next = setup2;
+Page hypo1 = {"hypo1.bmp", false, NULL, 0};
+Page bolus1 = {"bolus1.bmp", false, NULL, 0};
+Page clot1 = {"clot1.bmp", false, NULL, 0};
+Page remove1 = {"remove1.bmp", false, NULL, 0};
+Page fluid1 = {"fluid1.bmp", false, NULL, 0};
+Page lab1 = {"lab1.bmp", false, NULL, 0};
 
-Page prime1 = {"prime1.bmp", NULL, NULL, false, NULL, 0};
-Page connect1 = {"connect1.bmp", NULL, NULL, false, NULL, 0};
-Page settings1 = {"settings1.bmp", NULL, NULL, false, NULL, 0};
-Page launch1 = {"launch1.bmp", NULL, NULL, false, NULL, 0};
-Page end1 = {"end1.bmp", NULL, NULL, false, NULL, 0};
+Page treatment1 = {NULL, true, "Enter the patient's current weight (in kg) and press SELECT: \n", 0};
+Page treatment2 = {NULL, true, "Enter the patient's target weight (in kg) and press SELECT: \n", 0};
+Page treatment3 = {NULL, true, "Enter the patient's treatment time (in hours) and press SELECT: \n", 0};
 
-Page hypo1 = {"hypo1.bmp", NULL, NULL, false, NULL, 0};
-Page bolus1 = {"bolus1.bmp", NULL, NULL, false, NULL, 0};
-Page clot1 = {"clot1.bmp", NULL, NULL, false, NULL, 0};
-Page remove1 = {"remove1.bmp", NULL, NULL, false, NULL, 0};
-Page fluid1 = {"fluid1.bmp", NULL, NULL, false, NULL, 0};
-Page lab1 = {"lab1.bmp", NULL, NULL, false, NULL, 0};
+Page msetup = {"msetup.bmp", false, NULL, 0};
+Page mlaunch = {NULL, false, NULL, 0};
+Page mend = {NULL, false, NULL, 0};
+Page mcommon = {"mcommon.bmp", false, NULL, 0};
+Page errorsearch = {NULL, true, "Enter the error code (color and number) press SELECT: \n", 0};
+Page help = {NULL, false, "Do you need immediate assistance?\nCall your clinician or dial 911.", 0};
 
-Page treatment1 = {NULL, NULL, NULL, true, "Enter the patient's current weight (in kg) and press SELECT: \n", 0};
-Page treatment2 = {NULL, NULL, treatment1, true, "Enter the patient's target weight (in kg) and press SELECT: \n", 0};
-Page treatment3 = {NULL, NULL, treatment2, true, "Enter the patient's treatment time (in hours) and press SELECT: \n", 0};
+Section setup_subs[NUM_SECTIONS] = {{{setup1, setup2, setup3, setup4, setup5, setup6, setup7, setup8, NULL}, 0, NULL},
+                       {{prime1, NULL}, 0, NULL},
+                       {{connect1, NULL}, 0, NULL},
+                       {{settings1, NULL}, 0, NULL}, 
+                       {{launch1, NULL}, 0, NULL},
+                       {{end1, NULL}, 0, NULL}};
 
-treatment2.next = treatment3;
-treatment1.next = treatment2;
+Section common_subs[NUM_SECTIONS] = {{{hypo1, NULL}, 0, NULL},
+                       {{bolus1, NULL}, 0, NULL},
+                       {{clot1, NULL}, 0, NULL},
+                       {{remove1, NULL}, 0, NULL}, 
+                       {{fluid1, NULL}, 0, NULL},
+                       {{lab1, NULL}, 0, NULL}};
 
-Page errorsearch = {NULL, NULL, NULL, true, "Enter the error code (color and number) press SELECT: \n", 0};
-
-Page msetup = {"msetup.bmp", NULL, NULL, false, NULL, 0};
-Page mlaunch = {NULL, NULL, NULL, false, NULL, 0};
-Page mend = {NULL, NULL, NULL, false, NULL, 0};
-Page mcommon = {"mcommon.bmp", NULL, NULL, false, NULL, 0};
-Page error1 = {NULL, NULL, NULL, true, NULL, 0};
-
-Section setup_subs[NUM_SECTIONS] = {{setup1, 0, NULL},
-                       {prime1, 0, NULL},
-                       {connect1, 0, NULL},
-                       {settings1, 0, NULL}, 
-                       {launch1, 0, NULL},
-                       {end1, 0, NULL}};
-
-Section common_subs[NUM_SECTIONS] = {{hypo1, 0, NULL},
-                       {bolus1, 0, NULL},
-                       {clot1, 0, NULL},
-                       {remove1, 0, NULL}, 
-                       {fluid1, 0, NULL},
-                       {lab1, 0, NULL}};
-
-Section sections[NUM_SECTIONS] = {{treatment1, 4, NULL},
-                       {msetup, 0, setup_subs},
-                       {mlaunch, 0, NULL},
-                       {mend, 0, NULL}, 
-                       {mcommon, 0, common_subs},
-                       {errorsearch, 0, NULL}};
+Section sections[NUM_SECTIONS] = {{{treatment1, treatment2, treatment3, NULL}, 4, NULL},
+                       {{msetup, NULL}, 0, setup_subs},
+                       {{mlaunch, NULL}, 0, NULL},
+                       {{mend, NULL}, 0, NULL}, 
+                       {{mcommon, NULL}, 0, common_subs},
+                       {{errorsearch, NULL}, 0, NULL}};
 
 void goHome() 
 {
@@ -117,16 +104,40 @@ void goHome()
   bmpDraw("main.bmp", 0, 0); 
 }
 
+Page* getCurrentPages()
+{
+  Page *pages;
+  if (currentSection < NUM_SECTIONS) 
+  {
+     if (sections[currentSection].subsections == NULL)
+     {
+        pages = sections[currentSection].pages;
+     }
+     else
+     {
+        pages = sections[currentSection].subsections[currentSubSection].pages;
+     }
+  }
+  return pages;
+}
+
 //need to put checks in place so you can't "NEXT" when you've reached the end of a section
 //MAKE SURE YOU DON'T HAVE AN OFF BY ONE ERROR IN YOUR SECTION AND PAGE NUMBERS
 void goNext() 
 {  
-  if (currentPage.next != NULL)
-     currentPage = currentPage.next;
+  Page *pages = getCurrentPages();
+  if (pages[currentPage + 1] != NULL)
+     currentPage = currentPage + 1;
 }
 
-void goBack(int &pageNum) 
+void goBack() 
 {
+  Page *pages = getCurrentPages();
+  if ((currentPage == 0) && (currentSubSection > 0))
+  {
+     currentPage = 0;
+     currentSubSection--; // THIS IS NOT RIGHT.
+  }
   if (currentPage.previous != NULL)
      currentPage = currentPage.previous;
   else
@@ -207,7 +218,6 @@ void showPage()
             int i;
             for (i = 0; i < NUM_ERRORS; i++)
             {
-               Serial.print("hi we're happy");
                Error thisError = errorDictionary[i];
                ErrorCode thisCode = thisError.errorCode;
                if ((thisCode.color == color) && (thisCode.num == num))
@@ -240,9 +250,7 @@ void showPage()
      Display.putstr(answer);
   }*/
   
-//  Display.gfx_Button(BstateBack, 100, 300, RED, BLACK, FONT3, 1, 1, "Help") ;
-//  Display.gfx_Button(BstateNext, 20, 300, GRAY, WHITE, FONT3, 1, 1, "Back") ;
-//  Display.gfx_Button(BstateHelp, 180, 300, GRAY, WHITE, FONT3, 1, 1, "Next") ;
+
 }
                        
 void goToSection(int section)

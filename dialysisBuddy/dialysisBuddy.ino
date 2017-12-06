@@ -66,10 +66,8 @@ void loop()
    // Launch opening menu behavior
    if (inHomePage)
    {
-      //bmpDraw("main.bmp", 0, 0);
       int menuChoice = readButtons();
-      //int menuChoice = kpd.getKey() - '0';
-      //Serial.print(menuChoice);
+      delay(200) ; 
       if (menuChoice > 0) 
       {
          goToSection(menuChoice);
