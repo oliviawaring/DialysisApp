@@ -3,19 +3,19 @@
 //extern Picaso_Serial_4DLib Display;
 
 const byte ROWS = 4; // Four rows on our keypad
-const byte COLS = 4; // Four columns on our keypad 
+const byte COLS = 3; // Four columns on our keypad 
 
 // Define the Keymap
 char keys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'.','0','#','D'}
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'.','0','#'}
 };
 
 // Connect the pins
-byte rowPins[ROWS] = { 2, 3, 4, 5 };
-byte colPins[COLS] = { 6, 7, 8, 9 }; 
+byte rowPins[ROWS] = { 51, 41, 43, 47 };
+byte colPins[COLS] = { 49, 53, 45 }; 
 
 // Initialize the keypad
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
@@ -25,7 +25,7 @@ double getNumber(char key)
    double num = 0;
    int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
 
-   while (key != 'D') // we have to change this to a button press, eventually... dayum, that's going to be complicated
+   while (key != 'D') // we have to change this to a button press, eventually... dayum, that's going to be complicated HOW AM I GOING TO DO THIS OMG
    {
       if(key)
       {

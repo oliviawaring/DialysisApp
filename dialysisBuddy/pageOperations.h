@@ -5,26 +5,32 @@
 /* ***************************************************************/
 
 extern int sectionNum;
-extern int pageNum;
+//extern int pageNum;
 extern boolean inHomePage;
 extern Keypad kpd;
+extern Adafruit_ILI9340 screen;
 //extern Picaso_Serial_4DLib Display;
 
 const char *helpText = "Do you need help?"; 
 const char *homeText = "Welcome to your in-home dialysis buddy! Select from among the following options by pressing the corresponding number on your keypad:\n1. Setup\n2. Treatment\n3. Error Codes"; 
-const int NUM_SECTIONS = 3; // These are numbered in the way that makes sense to humans. We will have to compensate for array indexing in code. 
-const int SETUP = 1;
-const int VALUES = 2;
-const int ERRORS = 3;
+const int NUM_SECTIONS = 6; // These are numbered in the way that makes sense to humans. We will have to compensate for array indexing in code. 
+const int TREATMENT = 1;
+const int SETUP = 2;
+const int LAUNCH = 3;
+const int END = 4;
+const int COMMON = 5;
+const int ERRORS = 6;
 int inErrors = false;
 char *currentText = "";
+Page currentPage;
+Section currentSection;
  
 extern Session currentSession;
 extern Error errorDictionary[4];
 
 // The text associated with pages and sections get defined here. (This is not ideal... But reading in strings from an external text file is proving to be prohibitievely complicated. Stay tuned.)
-Page setupPages[4] = {{"This is dialysis instruction 1. Insert the cartridge.", false, NULL},
-                 {"This is dialysis instruction 2. Snap and tap.", false, NULL},
+/*Page setupPages[8] = {{"setup1.bmp", false, NULL},
+                 {"setup2.bmp", false, NULL},
                  {"This is dialysis instruction 3. Cannulate.", false, NULL},
                  {"End of setup instructions. Press back to return home.", false, NULL}};
 
@@ -35,75 +41,118 @@ Page valuePages[4] = {{"Enter the patient's current weight (in kg) and press SEL
 
 Page errorPages[2] = {{"Enter the error code (color and number) press SELECT: \n", true, NULL},
                       {"Error code not found. Please try again. The correct format of an error code is a color (A for green, B for red) followed by an integer.", true, NULL}};                      
-  
-Section sections[NUM_SECTIONS] = {{"Record Treatment Values", 4, NULL, valuePages}, 
-                       {"Setup", 4, NULL, setupPages},
-                       {"Error Codes", 2, NULL, errorPages}};
+*/
+
+typedef struct Page Page;
+
+Page setup1 = {"setup1.bmp", NULL, NULL, false, NULL, 0};
+Page setup2 = {"setup2.bmp", NULL, &setup1, false, NULL, 0};
+Page setup3 = {"setup3.bmp", NULL, &setup2, false, NULL, 0};
+Page setup4 = {"setup4.bmp", NULL, &setup3, false, NULL, 0};
+Page setup5 = {"setup5.bmp", NULL, &setup4, false, NULL, 0};
+Page setup6 = {"setup6.bmp", NULL, &setup5, false, NULL, 0};
+Page setup7 = {"setup7.bmp", NULL, &setup6, false, NULL, 0};
+Page setup8 = {"setup8.bmp", NULL, &setup7, false, NULL, 0};
+
+setup7.next = setup8;
+setup6.next = setup7;
+setup5.next = setup6;
+setup4.next = setup5;
+setup3.next = setup4;
+setup2.next = setup3;
+setup1.next = setup2;
+
+Page prime1 = {"prime1.bmp", NULL, NULL, false, NULL, 0};
+Page connect1 = {"connect1.bmp", NULL, NULL, false, NULL, 0};
+Page settings1 = {"settings1.bmp", NULL, NULL, false, NULL, 0};
+Page launch1 = {"launch1.bmp", NULL, NULL, false, NULL, 0};
+Page end1 = {"end1.bmp", NULL, NULL, false, NULL, 0};
+
+Page hypo1 = {"hypo1.bmp", NULL, NULL, false, NULL, 0};
+Page bolus1 = {"bolus1.bmp", NULL, NULL, false, NULL, 0};
+Page clot1 = {"clot1.bmp", NULL, NULL, false, NULL, 0};
+Page remove1 = {"remove1.bmp", NULL, NULL, false, NULL, 0};
+Page fluid1 = {"fluid1.bmp", NULL, NULL, false, NULL, 0};
+Page lab1 = {"lab1.bmp", NULL, NULL, false, NULL, 0};
+
+Page treatment1 = {NULL, NULL, NULL, true, "Enter the patient's current weight (in kg) and press SELECT: \n", 0};
+Page treatment2 = {NULL, NULL, treatment1, true, "Enter the patient's target weight (in kg) and press SELECT: \n", 0};
+Page treatment3 = {NULL, NULL, treatment2, true, "Enter the patient's treatment time (in hours) and press SELECT: \n", 0};
+
+treatment2.next = treatment3;
+treatment1.next = treatment2;
+
+Page errorsearch = {NULL, NULL, NULL, true, "Enter the error code (color and number) press SELECT: \n", 0};
+
+Page msetup = {"msetup.bmp", NULL, NULL, false, NULL, 0};
+Page mlaunch = {NULL, NULL, NULL, false, NULL, 0};
+Page mend = {NULL, NULL, NULL, false, NULL, 0};
+Page mcommon = {"mcommon.bmp", NULL, NULL, false, NULL, 0};
+Page error1 = {NULL, NULL, NULL, true, NULL, 0};
+
+Section setup_subs[NUM_SECTIONS] = {{setup1, 0, NULL},
+                       {prime1, 0, NULL},
+                       {connect1, 0, NULL},
+                       {settings1, 0, NULL}, 
+                       {launch1, 0, NULL},
+                       {end1, 0, NULL}};
+
+Section common_subs[NUM_SECTIONS] = {{hypo1, 0, NULL},
+                       {bolus1, 0, NULL},
+                       {clot1, 0, NULL},
+                       {remove1, 0, NULL}, 
+                       {fluid1, 0, NULL},
+                       {lab1, 0, NULL}};
+
+Section sections[NUM_SECTIONS] = {{treatment1, 4, NULL},
+                       {msetup, 0, setup_subs},
+                       {mlaunch, 0, NULL},
+                       {mend, 0, NULL}, 
+                       {mcommon, 0, common_subs},
+                       {errorsearch, 0, NULL}};
 
 void goHome() 
 {
-//  Display.gfx_Cls();   // clear screen
- // Display.putstr(homeText) ;
-  pageNum = 0;
   inHomePage = true;
-}
-
-void loadPage()
-{
-
-  // if the file is available, write to it:
-  File myFile = SD.open("test.txt");
-  if (myFile) 
-  {
-    Serial.println("test.txt:");
-    // read from the file until there's nothing else in it:
-    while (myFile.available()) {
-       //Serial.write(statusFile.read());
-       currentText = currentText + (char)myFile.read();
-    } 
-    // close the file:
-    myFile.close();
-  } 
-  else 
-  {
-    // if the file didn't open, print an error:
-    Serial.println("error opening test.txt");
-  }
+  bmpDraw("main.bmp", 0, 0); 
 }
 
 //need to put checks in place so you can't "NEXT" when you've reached the end of a section
 //MAKE SURE YOU DON'T HAVE AN OFF BY ONE ERROR IN YOUR SECTION AND PAGE NUMBERS
-void goNext(int &pageNum) 
+void goNext() 
 {  
-  if (pageNum != sections[sectionNum-1].numPages)
-     pageNum++;
+  if (currentPage.next != NULL)
+     currentPage = currentPage.next;
 }
 
 void goBack(int &pageNum) 
 {
-  if (pageNum > 1)
-     pageNum--;
+  if (currentPage.previous != NULL)
+     currentPage = currentPage.previous;
   else
-  {
-     goHome(); // If you back too far out of a section, you should get back to the home screen.
-  }
+     goHome();
 }
 
-void getHelp(int &pageNum) 
+void getHelp() 
 {
-  goNext(pageNum);
-//  Display.gfx_Cls();   // clear screen
-//  Display.putstr(helpText) ;
-  //Display.gfx_Button(BstateBack, 0, 100, RED, BLACK, FONT3, 2, 2, "Dial Clinician") ;
+  void fillScreen(uint16_t color);
+  screen.print("Do you need help?");
 }
 
 void showPage()
 {
-  Serial.print("in show page\n");
-//  Display.gfx_Cls();   // clear screen
-  Serial.print(sectionNum);
-  Serial.print(pageNum);
-  Section thisSection = sections[sectionNum-1];
+  if (currentPage.fileName != NULL)
+  {
+     bmpDraw(currentPage.fileName, 0, 0);
+  }
+
+  else if (currentPage.prompt != NULL)
+  {
+    void fillScreen(uint16_t color);
+     screen.print(currentPage.prompt);
+  }
+ 
+  /*Section thisSection = sections[sectionNum-1];
   Page thisPage = thisSection.pages[pageNum-1];
   if (inErrors)
   {
@@ -114,20 +163,16 @@ void showPage()
   {  
 //      Display.putstr(currentText); // print the relevant text
       currentText = "";
-  }
+      bmpDraw("setup.bmp", 0, 0);
+  }*/
   
-  if (thisPage.acceptsInput)
+  if (currentPage.acceptsInput) // if we're in a bmp this should NOT happen. Add a check. 
    {
       char key = kpd.getKey();
-      // wait a sec. I'm concerned. this is DEFINITELY not going to work. What am I doing here. This is only one key, yo. 
-      // but some variation on this theme did work before.... 
       Serial.print(sectionNum);
       switch(sectionNum)
       {
-         case SETUP: 
-            //woah! why are you here? There shouldn't be any inputs in this section!  
-            break;
-         case VALUES:
+         case TREATMENT: 
          {
             switch (pageNum)
             {
@@ -203,64 +248,11 @@ void showPage()
 void goToSection(int section)
 {
    pageNum = 1; // Reset the global page number to 1, since we're starting at the beginning of a section.
-   Serial.print(section);
    if (section <= NUM_SECTIONS)
    {
       sectionNum = section;
-      Serial.print("\ntesting");
-      Serial.print(sectionNum);
-      Serial.print("\n");
       showPage();
    }
 }
-
-
-/*
-void makePages()
-{
-    FILE *file;
-    char *myBuffer;
-    unsigned long fileLen;
-
-    file = fopen("dialysisInstructions.txt", "r");
-    if (!file) 
-    {
-       fprintf(stderr, "Can't open input file\n");
-       return;
-    }
-
-    //Get file length
-    fseek(file, 0, SEEK_END);
-    fileLen = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    //Allocate memory
-    myBuffer = (char *)malloc(fileLen+1);
-    if (!myBuffer)
-    {
-       fprintf(stderr, "Memory error!");
-                                fclose(file);
-       return;
-    }
-
-    //Read file contents into buffer
-    fread(myBuffer, fileLen, 1, file);
-    fclose(file);
-
-    for (int i=0; i < fileLen; i++)
-    {
-       //while(((char *)myBuffer)[i])
-       Serial.print(((char *)myBuffer)[i]);
-    }
-
-    //Do what ever with buffer
-
-    free(myBuffer);    
-   //fgets(line, 72)
- //   while (fgets(line, 72, ifp) != NULL)
- //   {
- //      if (line)
- //   }
-}*/
 
 

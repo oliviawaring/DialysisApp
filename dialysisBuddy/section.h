@@ -2,8 +2,7 @@
 
 struct Section
 {
-  char *title;
+  Page first;
   int numPages;
   Section *subsections;
-  Page *pages;
 };
