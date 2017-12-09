@@ -22,7 +22,7 @@
 #include "bitmaps.h"
 #include "pageOperations.h"
 #include "buttons.h"
-
+#include "process.h"
 
 #define TFT_RST 8
 #define TFT_DC 9
@@ -37,6 +37,9 @@ int sectionNum = 0; // Global variable governing the section number; start at se
 int pageNum = 0; // Global variable governing the page number of a given section; start at page "0".
 boolean inHomePage = true; // Tells us whether or not we're in the home page
 Session currentSession = {0, 0, 0, 0, {0, 0}, {0, 0}, {0, 0}, {0, 0}, 0, 0, 0, 0}; // Initialize the patient's current session values.
+int currentPage = 0;
+int currentSection = 0;
+int currentSubsection = 0;
 
 // Prepare the 4duino for program deployment
 void setup()
@@ -64,19 +67,10 @@ void setup()
 void loop()
 {  
    // Launch opening menu behavior
-   if (inHomePage)
-   {
-      int menuChoice = readButtons();
-      delay(200) ; 
-      if (menuChoice > 0) 
-      {
-         goToSection(menuChoice);
-         inHomePage = !inHomePage; 
-      }
-   }
-   
-  readButtons(); // Read button input
-  delay(200) ; 
+   //inHomePage = true;
+   int menuChoice = readButtons();
+   delay(200) ;    
+   process(menuChoice);
 }
 
 

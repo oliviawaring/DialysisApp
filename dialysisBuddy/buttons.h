@@ -1,7 +1,10 @@
 /**** buttons.h ****/
 
-extern int pageNum;
-extern int sectionNum;
+extern boolean inHomePage;
+extern int currentPage;
+extern int currentSection;
+extern int currentSubsection;
+boolean oneCycle = false;
 
 int readButtons()
 {
@@ -11,45 +14,82 @@ int readButtons()
    // We add approx 50 to those values and check to see if we are close.
    if ((adc_key_in > 1200) || (adc_key_in < 115)) 
       return; // We make this the 1st option for speed reasons since it will be the most likely result
+   oneCycle = false;
    if (adc_key_in < 215)   
    {
       Serial.print("red - help"); 
-      getHelp();
-      return 1;
+      if (inHomePage)
+      {
+         currentSection == 5;
+        // showPage();
+      }
+      else 
+      {
+        getHelp();
+      }
+      return 6;
    }
    if (adc_key_in < 381)  
    {
       Serial.print("yellow - home");
-      goHome();
-      return 2;
+      if (inHomePage)
+      {
+         currentSection == 4;
+        // showPage();
+      }
+      else
+      {
+         goHome();
+      }
+      return 5;
    }
    if (adc_key_in < 546)
    {
       Serial.print("purple - back");
-      return 3;
+      if (inHomePage)
+      {
+         currentSection == 3;
+        // showPage();
+      }
+      else
+      {
+        goBack();
+      }
+      return 4;
    }
    if (adc_key_in < 713)
    {
       Serial.print("green - next");
-      goNext(pageNum);
-      showPage(); 
-      return 4;
+      if (inHomePage)
+      {
+         currentSection == 2;
+         //showPage(); 
+      }
+      else
+      {
+        goNext();
+      }
+      return 3;
    }
    if (adc_key_in < 883)
    {
       Serial.print("blue");
-      goBack(pageNum);
-      if (pageNum > 0)
-         showPage(); 
-         return 5;
+      if (inHomePage)
+      {
+        currentSection == 1;
+        //showPage(); 
+      }
+      return 2;
    }  
    if (adc_key_in < 1052)
    {
       Serial.print("orange");
-      goBack(pageNum);
-      if (pageNum > 0)
-         showPage(); 
-         return 6;
+      if (inHomePage)
+      {
+         currentSection == 0;
+        // showPage(); 
+      }
+      return 1;
    }  
    Serial.print("none"); // when all others fail, return this...
    return 0;
