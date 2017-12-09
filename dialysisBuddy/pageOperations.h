@@ -7,6 +7,14 @@
 extern int sectionNum;
 //extern int pageNum;
 extern boolean inHomePage;
+extern boolean oneCycle;
+boolean inSetup = false;
+boolean inCommon = false;
+boolean inTail = false;
+boolean inTreatment = false;
+boolean inContent = false;
+int sequenceNum = 0;
+boolean inHelp = false;
 extern Keypad kpd;
 extern Adafruit_ILI9340 screen;
 //extern Picaso_Serial_4DLib Display;
@@ -128,13 +136,370 @@ Section sections[NUM_SECTIONS] = {{p1, 3, nullSubsections},
                        {p5, 1, common_subs},
                        {p6, 1, nullSubsections}};
 
+void processKeystroke(int n)
+{
+  return; 
+}
+
+
+// using pointers in C is too risky, let's try a WHOLE new approach
+void process(int n)
+{
+   Serial.print("Davey\n");
+   Serial.print(n);
+   if ((n > 6) || (oneCycle))
+      return;
+   else
+      oneCycle = true;
+   if (inContent)
+   {
+      if (inTail)
+      {
+         switch(n)
+         {
+            case 1: case 2: case 3:
+            {
+               //nothing happens, there is no next capability
+            }
+            case 4: //back
+            {
+                if (inSetup)
+                {
+                    bmpDraw("setup7.bmp", 0, 0);
+                    sequenceNum--;
+                    inTail = false;
+                }
+                else
+                {
+                    // man I really gotta figure this one out... NEED to get these bmps working though... 
+                }
+            }
+            case 5:
+            {
+               bmpDraw("main.bmp", 0, 0);
+               inHomePage = true;
+            }
+            case 6:
+            {
+               bmpDraw("mhelp.bmp", 0, 0);
+               inHelp = true;
+            }
+            default:
+            {
+               break;
+            }
+         }
+      }
+      else
+      {
+         switch(n)
+         {
+            case 1: case 2:
+            {
+               // these buttons do nothing
+            }
+            case 3:
+            {
+               if (inSetup)
+               {
+                  switch(sequenceNum)
+                  {
+                     case 1:
+                     {
+                         bmpDraw("setup2.bmp", 0, 0);
+                         sequenceNum++;
+                     }
+                     case 2:
+                     {
+                         bmpDraw("setup3.bmp", 0, 0);
+                         sequenceNum++;
+                     }
+                     case 3:
+                     {
+                         bmpDraw("setup4.bmp", 0, 0);
+                         sequenceNum++;
+                     }
+                     case 4:
+                     {
+                         bmpDraw("setup5.bmp", 0, 0);
+                         sequenceNum++;
+                     }
+                     case 5:
+                     {
+                         bmpDraw("setup6.bmp", 0, 0);
+                         sequenceNum++;
+                     }
+                     case 6:
+                     {
+                         bmpDraw("setup7.bmp", 0, 0);
+                         sequenceNum++;
+                     }
+                     case 7:
+                     {
+                         bmpDraw("setup8.bmp", 0, 0);
+                         inTail = true;
+                     }
+                     default:
+                     {
+                        break;
+                     }
+                  }
+               }
+            }
+            case 4:
+            {            
+               if (inSetup)
+               {
+                  switch(sequenceNum)
+                  {
+                     case 1:
+                     {
+                         bmpDraw("msetup.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     case 2:
+                     {
+                         bmpDraw("setup1.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     case 3:
+                     {
+                         bmpDraw("setup2.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     case 4:
+                     {
+                         bmpDraw("setup3.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     case 5:
+                     {
+                         bmpDraw("setup4.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     case 6:
+                     {
+                         bmpDraw("setup5.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     case 7:
+                     {
+                         bmpDraw("setup6.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     // if we hit case 8 there's something wrong because this should have been flagged in the tail bit
+                  }
+               }
+            }
+            case 5:
+            {
+               bmpDraw("main.bmp", 0, 0);
+               inHomePage = true;
+               break;
+            }
+            case 6:
+            {
+               bmpDraw("mhelp.bmp", 0, 0);
+               inHelp = true;
+               break;
+            }
+            default:
+            {
+               break;
+            }
+         }
+      }
+   }   
+
+   //Testing this is going to be a NIGHTMARE... have to make sure all possible paths are working, with all these crazy variables!
+   if (inHomePage)
+   {
+       Serial.print("ugh!");
+       inHomePage = false; 
+       switch(n)
+       {
+          case 1:
+          {
+             Serial.print("here!");
+             inTreatment = true;
+           //  screen.text("Enter the patient's current weight (in kg) and press SELECT: \n",0,0);
+             screen.fillScreen(ILI9340_BLACK);
+             screen.setCursor(0, 0);
+             screen.setTextColor(ILI9340_WHITE);  
+             screen.setTextSize(1);
+             screen.println("Enter the patient's current weight (in kg) and press SELECT:");
+             screen.println("I am sad");
+             sequenceNum = 1;
+             char key = kpd.getKey(); 
+             currentSession.currentWeight = getNumber(key);
+             break;
+          }
+          case 2:  
+          {
+             bmpDraw("msetup2.bmp", 0, 0);
+             inSetup = true;
+             break;
+          }
+          case 3:
+          {
+             bmpDraw("msetup.bmp", 0, 0);
+             break;
+          }
+          case 4:
+          {
+             bmpDraw("msetup.bmp", 0, 0);
+             break;
+          }
+          case 5:
+          {
+             bmpDraw("msetup.bmp", 0, 0);
+             inCommon = true;
+             break;
+          }
+          case 6:
+          {
+             bmpDraw("msetup.bmp", 0, 0);
+             break;
+          }
+          default:
+          {
+             break;
+          }
+       }
+   }
+   if (inTreatment)
+   {
+   // no... how am I handling the next button?
+       switch(sequenceNum)
+       {
+          case 2:
+          {
+             //screen.text("Enter the patient's current weight (in kg) and press SELECT: \n",0,0);
+             screen.fillScreen(ILI9340_BLACK);
+             screen.setCursor(0, 0);
+             screen.setTextColor(ILI9340_WHITE);  
+             screen.setTextSize(1);
+             screen.println("Enter the patient's current weight (in kg) and press SELECT:");
+             sequenceNum++;
+             char key = kpd.getKey(); 
+             currentSession.targetWeight = getNumber(key);
+             break;
+          }
+          case 3:  
+          {
+             break;
+          }
+          default:
+          {
+             break;
+          }
+       }
+   }
+   if (inSetup)
+   {
+       inSetup = false;
+       inContent = true;
+       switch(n)
+       {
+          case 1:
+          {
+             bmpDraw("setup1.bmp", 0, 0);
+             sequenceNum = 1;
+             break;
+          }
+          case 2:  
+          {
+             bmpDraw("prime1.bmp", 0, 0);
+             inTail = true;
+             break;
+          }
+          case 3:
+          {
+             bmpDraw("connect1.bmp", 0, 0);
+             inTail = true;
+             break;
+          }
+          case 4:
+          {
+             bmpDraw("settings1.bmp", 0, 0);
+             inTail = true;
+             break;
+          }
+          case 5:
+          {
+             bmpDraw("launch1.bmp", 0, 0);
+             inTail = true;
+             break;
+          }
+          case 6:
+          {
+             bmpDraw("end1.bmp", 0, 0);
+             inTail = true;
+             break;
+          }
+          default:
+          {
+             break;
+          }
+       }
+   }
+   else if (inCommon)
+   {
+       inCommon = false;
+       inContent = true;
+       switch(n)
+       {
+          case 1:
+          {
+             bmpDraw("hypo1.bmp", 0, 0);
+          }
+          case 2:  
+          {
+             bmpDraw("bolus1.bmp", 0, 0);
+             inTail = true;
+          }
+          case 3:
+          {
+             bmpDraw("clot1.bmp", 0, 0);
+             inTail = true;
+          }
+          case 4:
+          {
+             bmpDraw("remove1.bmp", 0, 0);
+             inTail = true;
+          }
+          case 5:
+          {
+             bmpDraw("fluid1.bmp", 0, 0);
+             inTail = true;
+          }
+          case 6:
+          {
+             bmpDraw("lab1.bmp", 0, 0);
+             inTail = true;
+          }
+          default:
+          {
+             break;
+          }
+      }
+   }
+}
+
 void goHome() 
 {
   inHomePage = true;
   bmpDraw("main.bmp", 0, 0); 
 }
 
-Page* getCurrentPages()
+/*Page* getCurrentPages()
 {
   Page *pages;
   if (currentSection < NUM_SECTIONS) 
@@ -153,15 +518,15 @@ Page* getCurrentPages()
   }
   Serial.print(pages[currentPage].fileName);
   return pages;
-}
+}*/
 
 //need to put checks in place so you can't "NEXT" when you've reached the end of a section
 //MAKE SURE YOU DON'T HAVE AN OFF BY ONE ERROR IN YOUR SECTION AND PAGE NUMBERS
 void goNext() 
-{  
+{  /*
   Page *pages = getCurrentPages();
   if (pages[currentPage + 1].fileName != nullPage.fileName)
-     currentPage = currentPage + 1;
+     currentPage = currentPage + 1;*/
 }
 
 void goBack() 

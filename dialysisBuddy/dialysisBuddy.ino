@@ -64,19 +64,10 @@ void setup()
 void loop()
 {  
    // Launch opening menu behavior
-   if (inHomePage)
-   {
-      int menuChoice = readButtons();
-      delay(200) ; 
-      if (menuChoice > 0) 
-      {
-         goToSection(menuChoice);
-         inHomePage = !inHomePage; 
-      }
-   }
-   
-  readButtons(); // Read button input
-  delay(200) ; 
+   inHomePage = true;
+   int menuChoice = readButtons();
+   delay(200) ;    
+   process(menuChoice);
 }
 
 

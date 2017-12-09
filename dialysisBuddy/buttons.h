@@ -1,6 +1,7 @@
 /**** buttons.h ****/
 
 extern boolean inHomePage;
+boolean oneCycle = false;
 
 int readButtons()
 {
@@ -10,6 +11,7 @@ int readButtons()
    // We add approx 50 to those values and check to see if we are close.
    if ((adc_key_in > 1200) || (adc_key_in < 115)) 
       return; // We make this the 1st option for speed reasons since it will be the most likely result
+   oneCycle = false;
    if (adc_key_in < 215)   
    {
       Serial.print("red - help"); 
@@ -22,7 +24,7 @@ int readButtons()
       {
         getHelp();
       }
-      return 1;
+      return 6;
    }
    if (adc_key_in < 381)  
    {
@@ -36,7 +38,7 @@ int readButtons()
       {
          goHome();
       }
-      return 2;
+      return 5;
    }
    if (adc_key_in < 546)
    {
@@ -50,7 +52,7 @@ int readButtons()
       {
         goBack();
       }
-      return 3;
+      return 4;
    }
    if (adc_key_in < 713)
    {
@@ -64,7 +66,7 @@ int readButtons()
       {
         goNext();
       }
-      return 4;
+      return 3;
    }
    if (adc_key_in < 883)
    {
@@ -74,7 +76,7 @@ int readButtons()
         currentSection == 1;
         showPage(); 
       }
-      return 5;
+      return 2;
    }  
    if (adc_key_in < 1052)
    {
@@ -84,7 +86,7 @@ int readButtons()
          currentSection == 0;
          showPage(); 
       }
-      return 6;
+      return 1;
    }  
    Serial.print("none"); // when all others fail, return this...
    return 0;

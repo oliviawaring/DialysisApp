@@ -1,6 +1,7 @@
 /**** keyboard.h ****/
 
 //extern Picaso_Serial_4DLib Display;
+extern Adafruit_ILI9340 screen;
 
 const byte ROWS = 4; // Four rows on our keypad
 const byte COLS = 3; // Four columns on our keypad 
@@ -20,11 +21,13 @@ byte colPins[COLS] = { 49, 53, 45 };
 // Initialize the keypad
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
+
+
+
 double getNumber(char key)
 {
    double num = 0;
    int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
-
    while (key != 'D') // we have to change this to a button press, eventually... dayum, that's going to be complicated HOW AM I GOING TO DO THIS OMG
    {
       if(key)
@@ -45,11 +48,18 @@ double getNumber(char key)
                else 
                   num = num * 10 + (key - '0');
                char value[] = {key, '\0'};
+               Serial.print("are we here?");
+               screen.setCursor(100, 100);
+               screen.setTextColor(ILI9340_WHITE);  
+               screen.setTextSize(4);
+               screen.println("hi");
 //               Display.putstr(value); 
+               Serial.print("why are we not printing?");
                break;
             }
             case '.': 
                postDecVal++;
+               screen.print(".");
 //               Display.putstr(".");
                break;
             case 'A': 
@@ -67,6 +77,8 @@ double getNumber(char key)
    }
    return num;
 }
+
+
 
 ErrorCode getErrorCode(char key)
 {
@@ -95,7 +107,8 @@ ErrorCode getErrorCode(char key)
                }
                Serial.print("safe");
                num = num * 10 + (key - '0');
-               char value[] = {key, '\0'};
+               char value[] = {key, '\0'};  
+               screen.print(value);
 //               Display.putstr(value); 
                gotNum++;
                break;
@@ -107,6 +120,7 @@ ErrorCode getErrorCode(char key)
                   return ec; // too many color codes! 
                ec.color = 'G'; // Green error code! 
                gotColor = !gotColor;
+               screen.print("Green ");
 //               Display.putstr("Green ");
                break;
             }
@@ -116,6 +130,7 @@ ErrorCode getErrorCode(char key)
                   return ec; // too many color codes! 
                ec.color = 'R'; // Red error code! 
                gotColor = !gotColor;
+               screen.print("Red ");
         //       Display.putstr("Red ");
                break;
             }
