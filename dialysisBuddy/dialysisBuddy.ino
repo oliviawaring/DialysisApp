@@ -11,6 +11,7 @@
 #include <SD.h>       // this is needed for display
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ILI9340.h>
+#include <SoftwareSerial.h>
 #include <Keypad.h>
 #include "Math.h"
 #include "page.h"
@@ -28,8 +29,10 @@
 #define TFT_DC 9
 #define TFT_CS 10
 #define SD_CS 4
+const int TxPin = 18; //TX1 on Mega
 
 Adafruit_ILI9340 screen = Adafruit_ILI9340(TFT_CS, TFT_DC, TFT_RST);
+SoftwareSerial mySerial = SoftwareSerial(255, TxPin);
 //Keypad kpd;
 
 word x, y ; // Touchscreen coordinates (keeping this in case we need to resurrect the touchscreen later)
@@ -45,7 +48,6 @@ int currentSubsection = 0;
 void setup()
 {
   Serial.begin(9600);
-
   pinMode(SD_CS, OUTPUT);
   digitalWrite(SD_CS, HIGH);
   
@@ -57,9 +59,23 @@ void setup()
     Serial.println("failed!");
     return;
   }
+  
   Serial.println("OK!");
+  pinMode(TxPin, OUTPUT);
+  digitalWrite(TxPin, HIGH);
+  delay(100);
+  mySerial.begin(9600);
+  mySerial.write(12);                 // Clear             
+  mySerial.write(17);                 // Turn backlight on
+  delay(5);                           // Required delay
+  delay(3000);                        // Wait 3 seconds
+  mySerial.print("Welcome to your");  // First line
+  mySerial.write(13);                 // Carriage return
+  mySerial.print("Dialysis Buddy!");   // Second line
 
-  goHome();
+  bmpDraw("main.bmp", 0, 0); 
+
+  //goHome();
   
 } // end Setup **do not alter, remove or duplicate this line**
 

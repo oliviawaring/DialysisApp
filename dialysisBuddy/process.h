@@ -51,12 +51,12 @@ void process(int n)
                 {     
                     // man I really gotta figure this one out... NEED to get these bmps working though... 
                 }
-                else if () // in a certain submenu
-                {
+                //else if () // in a certain submenu
+               // {
                 
-                }
+                //}
                 else // in this case, we're in a tail, and the next step directly up is the homepage!!
-                
+                   return;
             }
             case 5:
             {
