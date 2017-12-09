@@ -147,7 +147,7 @@ void processKeystroke(int n)
 void goHome() 
 {
   inHomePage = true;
-  bmpDraw("main.bmp", 0, 0); 
+  bmpDraw("setup1.bmp", 0, 0); 
 }
 
 /*Page* getCurrentPages()
