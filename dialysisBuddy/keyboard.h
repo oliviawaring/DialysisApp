@@ -21,9 +21,6 @@ byte colPins[COLS] = { 49, 53, 45 };
 // Initialize the keypad
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
-
-
-
 double getNumber(char key)
 {
    double num = 0;

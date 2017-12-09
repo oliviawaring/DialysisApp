@@ -39,7 +39,7 @@ void process(int n)
             {
                //nothing happens, there is no next capability
             }
-            case 4: //back
+            case 4: //back - this is going to be REALLY irritating, because we have to account for all the different possibilities... I should draw a diagram
             {
                 if (inSetup)
                 {
@@ -47,10 +47,16 @@ void process(int n)
                     sequenceNum--;
                     inTail = false;
                 }
-                else
-                {
+                else if (inTreatment)
+                {     
                     // man I really gotta figure this one out... NEED to get these bmps working though... 
                 }
+                else if () // in a certain submenu
+                {
+                
+                }
+                else // in this case, we're in a tail, and the next step directly up is the homepage!!
+                
             }
             case 5:
             {
@@ -208,7 +214,6 @@ void process(int n)
        {
           case 1:
           {
-            
              Serial.print("here!");
              inTreatment = true;
            //  screen.text("Enter the patient's current weight (in kg) and press SELECT: \n",0,0);
@@ -293,20 +298,24 @@ void process(int n)
           }
           case 2:  
           {
-             bmpDraw("msetup2.bmp", 0, 0);
+             bmpDraw("msetup.bmp", 0, 0);
              inSetup = true;
              inHomePage = false; 
              break;
           }
           case 3:
           {
-             bmpDraw("mlaunch.bmp", 0, 0);
+             bmpDraw("launch1.bmp", 0, 0);
+             inContent = true;
+             inTail = true;
              inHomePage = false; 
              break;
           }
           case 4:
           {
-             bmpDraw("mend.bmp", 0, 0);
+             bmpDraw("end1.bmp", 0, 0);
+             inContent = true;
+             inTail = true;
              inHomePage = false; 
              break;
           }
@@ -376,44 +385,54 @@ void process(int n)
    }
    else if (inSetup)
    {
-       inSetup = false;
-       inContent = true;
        switch(n)
        {
           case 1:
           {
              bmpDraw("setup1.bmp", 0, 0);
              sequenceNum = 1;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 2:  
           {
              bmpDraw("prime1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 3:
           {
              bmpDraw("connect1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 4:
           {
              bmpDraw("settings1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 5:
           {
              bmpDraw("launch1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 6:
           {
              bmpDraw("end1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           default:
