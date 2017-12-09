@@ -29,6 +29,7 @@ double getNumber(char key)
    double num = 0;
    int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
    while (key != 'D') // we have to change this to a button press, eventually... dayum, that's going to be complicated HOW AM I GOING TO DO THIS OMG
+   // it's okay... i was gonna have to overhaul this anyway, cuz it can't be the D thing...
    {
       if(key)
       {

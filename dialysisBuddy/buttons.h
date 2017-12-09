@@ -1,6 +1,9 @@
 /**** buttons.h ****/
 
 extern boolean inHomePage;
+extern int currentPage;
+extern int currentSection;
+extern int currentSubsection;
 boolean oneCycle = false;
 
 int readButtons()
