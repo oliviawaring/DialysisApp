@@ -3,7 +3,6 @@
 /* Author: MIT Dialysis Team, Fall 2017                                           
 /* Test File  
 /* ***************************************************************/
-
 #define RESETLINE     30
 #define DisplaySerial Serial1
 #define BUFFPIXEL 20
