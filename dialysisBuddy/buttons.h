@@ -1,7 +1,6 @@
 /**** buttons.h ****/
 
-extern int pageNum;
-extern int sectionNum;
+extern boolean inHomePage;
 
 int readButtons()
 {
@@ -14,42 +13,78 @@ int readButtons()
    if (adc_key_in < 215)   
    {
       Serial.print("red - help"); 
-      getHelp();
+      if (inHomePage)
+      {
+         currentSection == 5;
+         showPage();
+      }
+      else 
+      {
+        getHelp();
+      }
       return 1;
    }
    if (adc_key_in < 381)  
    {
       Serial.print("yellow - home");
-      goHome();
+      if (inHomePage)
+      {
+         currentSection == 4;
+         showPage();
+      }
+      else
+      {
+         goHome();
+      }
       return 2;
    }
    if (adc_key_in < 546)
    {
       Serial.print("purple - back");
+      if (inHomePage)
+      {
+         currentSection == 3;
+         showPage();
+      }
+      else
+      {
+        goBack();
+      }
       return 3;
    }
    if (adc_key_in < 713)
    {
       Serial.print("green - next");
-      goNext(pageNum);
-      showPage(); 
+      if (inHomePage)
+      {
+         currentSection == 2;
+         showPage(); 
+      }
+      else
+      {
+        goNext();
+      }
       return 4;
    }
    if (adc_key_in < 883)
    {
       Serial.print("blue");
-      goBack(pageNum);
-      if (pageNum > 0)
-         showPage(); 
-         return 5;
+      if (inHomePage)
+      {
+        currentSection == 1;
+        showPage(); 
+      }
+      return 5;
    }  
    if (adc_key_in < 1052)
    {
       Serial.print("orange");
-      goBack(pageNum);
-      if (pageNum > 0)
+      if (inHomePage)
+      {
+         currentSection == 0;
          showPage(); 
-         return 6;
+      }
+      return 6;
    }  
    Serial.print("none"); // when all others fail, return this...
    return 0;

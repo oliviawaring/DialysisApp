@@ -24,7 +24,7 @@ int inErrors = false;
 char *currentText = "";
 int currentPage = 0;
 int currentSection = 0;
-int currentSubSection = 0;
+int currentSubsection = 0;
  
 extern Session currentSession;
 extern Error errorDictionary[4];
@@ -44,6 +44,14 @@ Page errorPages[2] = {{"Enter the error code (color and number) press SELECT: \n
                       {"Error code not found. Please try again. The correct format of an error code is a color (A for green, B for red) followed by an integer.", true, NULL}};                      
 */
 
+// A null Page
+Page nullPage = {"", false, NULL, 0};
+Page nullPages[2] = {nullPage, nullPage};
+Subsection nullSubsection = {nullPages, 0};
+Subsection nullSubsections[2] = {nullSubsection, nullSubsection};
+Section nullSection = {nullPages, 0, nullSubsections};
+
+// The pages
 Page setup1 = {"setup1.bmp", false, NULL, 0};
 Page setup2 = {"setup2.bmp", false, NULL, 0};
 Page setup3 = {"setup3.bmp", false, NULL, 0};
@@ -77,26 +85,48 @@ Page mcommon = {"mcommon.bmp", false, NULL, 0};
 Page errorsearch = {NULL, true, "Enter the error code (color and number) press SELECT: \n", 0};
 Page help = {NULL, false, "Do you need immediate assistance?\nCall your clinician or dial 911.", 0};
 
-Section setup_subs[NUM_SECTIONS] = {{{setup1, setup2, setup3, setup4, setup5, setup6, setup7, setup8, NULL}, 0, NULL},
-                       {{prime1, NULL}, 0, NULL},
-                       {{connect1, NULL}, 0, NULL},
-                       {{settings1, NULL}, 0, NULL}, 
-                       {{launch1, NULL}, 0, NULL},
-                       {{end1, NULL}, 0, NULL}};
+Page a1[9] = {setup1, setup2, setup3, setup4, setup5, setup6, setup7, setup8, nullPage};
+Page a2[2] = {prime1, nullPage};
+Page a3[2] = {connect1, nullPage};
+Page a4[2] = {settings1, nullPage};
+Page a5[2] = {launch1, nullPage};
+Page a6[2] = {end1, nullPage};
 
-Section common_subs[NUM_SECTIONS] = {{{hypo1, NULL}, 0, NULL},
-                       {{bolus1, NULL}, 0, NULL},
-                       {{clot1, NULL}, 0, NULL},
-                       {{remove1, NULL}, 0, NULL}, 
-                       {{fluid1, NULL}, 0, NULL},
-                       {{lab1, NULL}, 0, NULL}};
+Subsection setup_subs[NUM_SECTIONS] = {{a1, 8},
+                       {a2, 1},
+                       {a3, 1},
+                       {a4, 1}, 
+                       {a5, 1},
+                       {a6, 1}};
 
-Section sections[NUM_SECTIONS] = {{{treatment1, treatment2, treatment3, NULL}, 4, NULL},
-                       {{msetup, NULL}, 0, setup_subs},
-                       {{mlaunch, NULL}, 0, NULL},
-                       {{mend, NULL}, 0, NULL}, 
-                       {{mcommon, NULL}, 0, common_subs},
-                       {{errorsearch, NULL}, 0, NULL}};
+Page b1[2] = {hypo1, nullPage};
+Page b2[2] = {bolus1, nullPage};
+Page b3[2] = {clot1, nullPage};
+Page b4[2] = {remove1, nullPage};
+Page b5[2] = {fluid1, nullPage};
+Page b6[2] = {lab1, nullPage};
+
+Subsection common_subs[NUM_SECTIONS] = {{b1, 1},
+                       {b2, 1},
+                       {b3, 1},
+                       {b4, 1}, 
+                       {b5, 1},
+                       {b6, 1}};
+
+Page p1[4] = {treatment1, treatment2, treatment3, nullPage};
+Page p2[2] = {msetup, nullPage};
+Page p3[2] = {mlaunch, nullPage};
+Page p4[2] = {mend, nullPage};
+Page p5[2] = {mcommon, nullPage};
+Page p6[2] = {errorsearch, nullPage};
+
+// Main sections
+Section sections[NUM_SECTIONS] = {{p1, 3, nullSubsections},
+                       {p2, 1, setup_subs},
+                       {p3, 1, nullSubsections},
+                       {p4, 1, nullSubsections}, 
+                       {p5, 1, common_subs},
+                       {p6, 1, nullSubsections}};
 
 void goHome() 
 {
@@ -111,13 +141,17 @@ Page* getCurrentPages()
   {
      if (sections[currentSection].subsections == NULL)
      {
-        pages = sections[currentSection].pages;
+        Serial.print("heyy");
+        *pages = *sections[currentSection].pages;
+        Serial.print(pages[currentPage].fileName);
      }
      else
      {
-        pages = sections[currentSection].subsections[currentSubSection].pages;
+        Serial.print("yoyoy");
+        *pages = *sections[currentSection].subsections[currentSubsection].pages;
      }
   }
+  Serial.print(pages[currentPage].fileName);
   return pages;
 }
 
@@ -126,12 +160,13 @@ Page* getCurrentPages()
 void goNext() 
 {  
   Page *pages = getCurrentPages();
-  if (pages[currentPage + 1] != NULL)
+  if (pages[currentPage + 1].fileName != nullPage.fileName)
      currentPage = currentPage + 1;
 }
 
 void goBack() 
 {
+  /*
   Page *pages = getCurrentPages();
   if ((currentPage == 0) && (currentSubSection > 0))
   {
@@ -142,6 +177,8 @@ void goBack()
      currentPage = currentPage.previous;
   else
      goHome();
+     */
+  return;
 }
 
 void getHelp() 
@@ -152,16 +189,36 @@ void getHelp()
 
 void showPage()
 {
-  if (currentPage.fileName != NULL)
-  {
-     bmpDraw(currentPage.fileName, 0, 0);
-  }
+  //Page *pages = getCurrentPages();
+  Serial.print(currentSection);
+  Serial.print("helloooo\n");
+  Serial.print(currentPage);
+ // Serial.print(pages[currentPage].fileName);
+  if ((sections[currentSection].subsections)->numPages == nullSubsection.numPages)
+     {
+        Serial.print("heyy");
+        Serial.print((sections[currentSection].pages)[currentPage].fileName);
+        bmpDraw((sections[currentSection].pages)[currentPage].fileName, 0, 0);
+       // Serial.print(pages[currentPage].fileName);
+     }
+     else
+     {
+        Serial.print("yoyoy");
+        bmpDraw(((sections[currentSection].subsections)[currentSubsection].pages)->fileName, 0, 0);
+       // *pages = *sections[currentSection].subsections[currentSubSection].pages;
+     }
 
-  else if (currentPage.prompt != NULL)
+     
+ // if (pages[currentPage].fileName != nullPage.fileName)
+ // {
+ //    bmpDraw(pages[currentPage].fileName, 0, 0);
+ // }
+
+  /*else if (pages[currentPage].prompt != nullPage.prompt)
   {
     void fillScreen(uint16_t color);
-     screen.print(currentPage.prompt);
-  }
+     screen.print(pages[currentPage].prompt);
+  }*/
  
   /*Section thisSection = sections[sectionNum-1];
   Page thisPage = thisSection.pages[pageNum-1];
@@ -177,7 +234,7 @@ void showPage()
       bmpDraw("setup.bmp", 0, 0);
   }*/
   
-  if (currentPage.acceptsInput) // if we're in a bmp this should NOT happen. Add a check. 
+ /* if (pages[currentPage].acceptsInput) // if we're in a bmp this should NOT happen. Add a check. 
    {
       char key = kpd.getKey();
       Serial.print(sectionNum);
@@ -185,7 +242,7 @@ void showPage()
       {
          case TREATMENT: 
          {
-            switch (pageNum)
+            switch (currentPage)
             {
                case 1:
                   currentSession.currentWeight = getNumber(key);
@@ -208,7 +265,7 @@ void showPage()
             ErrorCode errorCode = getErrorCode(key);
             if (!errorCode.complete)
             {
-               pageNum = 2;
+               currentPage = 2;
                showPage();
                break;
             }
@@ -222,7 +279,7 @@ void showPage()
                ErrorCode thisCode = thisError.errorCode;
                if ((thisCode.color == color) && (thisCode.num == num))
                {
-                  pageNum = thisError.page; // But going back should bring you back to the search page, NOT the previous error in the dictionary
+                  currentPage = thisError.page; // But going back should bring you back to the search page, NOT the previous error in the dictionary
                   inErrors = true;
                   showPage();
                   break;
@@ -230,7 +287,7 @@ void showPage()
             }
             break;
          }
-      }
+      }*/
       /*goNext(pageNum);
       Serial.print(pageNum);
       if (pageNum == 5) //THIS IS MEGA HACKY, WE WILL NOT DO THIS IN THE ACTUAL PROGRAM
@@ -241,7 +298,7 @@ void showPage()
       }
       else
          showPage(sectionNum, pageNum, NULL);*/
-  }
+  //}
   /*if (val != (double)NULL)
   {
      char answer[] = {'0','0','0','0','0','0'};
@@ -255,7 +312,7 @@ void showPage()
                        
 void goToSection(int section)
 {
-   pageNum = 1; // Reset the global page number to 1, since we're starting at the beginning of a section.
+   currentPage = 1; // Reset the global page number to 1, since we're starting at the beginning of a section. Not 
    if (section <= NUM_SECTIONS)
    {
       sectionNum = section;
