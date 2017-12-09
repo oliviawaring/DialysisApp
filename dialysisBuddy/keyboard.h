@@ -32,6 +32,8 @@ double getNumber(char key)
    {
       if(key)
       {
+         Serial.print("\nlettuce");
+         Serial.print(key);
          switch (key) 
          {           
             case NO_KEY:
@@ -48,11 +50,13 @@ double getNumber(char key)
                else 
                   num = num * 10 + (key - '0');
                char value[] = {key, '\0'};
+               Serial.print(value);
                Serial.print("are we here?");
-               screen.setCursor(100, 100);
+               screen.fillScreen(ILI9340_RED);
+              /* screen.setCursor(100, 100);
                screen.setTextColor(ILI9340_WHITE);  
                screen.setTextSize(4);
-               screen.println("hi");
+               screen.println("hi");*/
 //               Display.putstr(value); 
                Serial.print("why are we not printing?");
                break;

@@ -18,7 +18,7 @@ int readButtons()
       if (inHomePage)
       {
          currentSection == 5;
-         showPage();
+        // showPage();
       }
       else 
       {
@@ -32,7 +32,7 @@ int readButtons()
       if (inHomePage)
       {
          currentSection == 4;
-         showPage();
+        // showPage();
       }
       else
       {
@@ -46,7 +46,7 @@ int readButtons()
       if (inHomePage)
       {
          currentSection == 3;
-         showPage();
+        // showPage();
       }
       else
       {
@@ -60,7 +60,7 @@ int readButtons()
       if (inHomePage)
       {
          currentSection == 2;
-         showPage(); 
+         //showPage(); 
       }
       else
       {
@@ -74,7 +74,7 @@ int readButtons()
       if (inHomePage)
       {
         currentSection == 1;
-        showPage(); 
+        //showPage(); 
       }
       return 2;
    }  
@@ -84,7 +84,7 @@ int readButtons()
       if (inHomePage)
       {
          currentSection == 0;
-         showPage(); 
+        // showPage(); 
       }
       return 1;
    }  

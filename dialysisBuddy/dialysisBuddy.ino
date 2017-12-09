@@ -64,7 +64,7 @@ void setup()
 void loop()
 {  
    // Launch opening menu behavior
-   inHomePage = true;
+   //inHomePage = true;
    int menuChoice = readButtons();
    delay(200) ;    
    process(menuChoice);

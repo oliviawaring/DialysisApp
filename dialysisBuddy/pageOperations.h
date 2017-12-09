@@ -13,6 +13,7 @@ boolean inCommon = false;
 boolean inTail = false;
 boolean inTreatment = false;
 boolean inContent = false;
+boolean inErrors = false;
 int sequenceNum = 0;
 boolean inHelp = false;
 extern Keypad kpd;
@@ -28,7 +29,6 @@ const int LAUNCH = 3;
 const int END = 4;
 const int COMMON = 5;
 const int ERRORS = 6;
-int inErrors = false;
 char *currentText = "";
 int currentPage = 0;
 int currentSection = 0;
@@ -147,6 +147,12 @@ void process(int n)
 {
    Serial.print("Davey\n");
    Serial.print(n);
+   Serial.print("\nIn Homepage");
+   Serial.print(inHomePage);
+   Serial.print("\nIn Content");
+   Serial.print(inContent);
+   Serial.print("\nIn Setup");
+   Serial.print(inSetup);
    if ((n > 6) || (oneCycle))
       return;
    else
@@ -178,11 +184,13 @@ void process(int n)
             {
                bmpDraw("main.bmp", 0, 0);
                inHomePage = true;
+               inContent = false;
             }
             case 6:
             {
                bmpDraw("mhelp.bmp", 0, 0);
                inHelp = true;
+               // should the help page count as being in content?
             }
             default:
             {
@@ -204,6 +212,7 @@ void process(int n)
                {
                   switch(sequenceNum)
                   {
+                     Serial.print("Life is hard");
                      case 1:
                      {
                          bmpDraw("setup2.bmp", 0, 0);
@@ -302,6 +311,7 @@ void process(int n)
             {
                bmpDraw("main.bmp", 0, 0);
                inHomePage = true;
+               inContent = false;
                break;
             }
             case 6:
@@ -319,10 +329,9 @@ void process(int n)
    }   
 
    //Testing this is going to be a NIGHTMARE... have to make sure all possible paths are working, with all these crazy variables!
-   if (inHomePage)
+   else if (inHomePage)
    {
        Serial.print("ugh!");
-       inHomePage = false; 
        switch(n)
        {
           case 1:
@@ -335,37 +344,51 @@ void process(int n)
              screen.setTextColor(ILI9340_WHITE);  
              screen.setTextSize(1);
              screen.println("Enter the patient's current weight (in kg) and press SELECT:");
-             screen.println("I am sad");
              sequenceNum = 1;
              char key = kpd.getKey(); 
+             Serial.print(key);
              currentSession.currentWeight = getNumber(key);
+             inHomePage = false; 
              break;
           }
           case 2:  
           {
              bmpDraw("msetup2.bmp", 0, 0);
              inSetup = true;
+             inHomePage = false; 
              break;
           }
           case 3:
           {
-             bmpDraw("msetup.bmp", 0, 0);
+             bmpDraw("mlaunch.bmp", 0, 0);
+             inHomePage = false; 
              break;
           }
           case 4:
           {
-             bmpDraw("msetup.bmp", 0, 0);
+             bmpDraw("mend.bmp", 0, 0);
+             inHomePage = false; 
              break;
           }
           case 5:
           {
-             bmpDraw("msetup.bmp", 0, 0);
+             bmpDraw("mcommon.bmp", 0, 0);
+             inHomePage = false; 
              inCommon = true;
              break;
           }
           case 6:
           {
-             bmpDraw("msetup.bmp", 0, 0);
+             inErrors = true;
+             screen.fillScreen(ILI9340_BLACK);
+             screen.setCursor(0, 0);
+             screen.setTextColor(ILI9340_WHITE);  
+             screen.setTextSize(1);
+             screen.println("Enter the error code (color and number) press SELECT: \n");
+             sequenceNum = 1;
+             char key = kpd.getKey(); 
+             getErrorCode(key);
+             inHomePage = false; 
              break;
           }
           default:
@@ -374,9 +397,10 @@ void process(int n)
           }
        }
    }
-   if (inTreatment)
+   else if (inTreatment)
    {
    // no... how am I handling the next button?
+   // we should probably draw this in somehow. I'll save it for later. 
        switch(sequenceNum)
        {
           case 2:
@@ -402,7 +426,7 @@ void process(int n)
           }
        }
    }
-   if (inSetup)
+   else if (inSetup)
    {
        inSetup = false;
        inContent = true;
@@ -552,6 +576,7 @@ void getHelp()
   screen.print("Do you need help?");
 }
 
+/*
 void showPage()
 {
   //Page *pages = getCurrentPages();
@@ -670,12 +695,11 @@ void showPage()
      double2string(answer, val);
      Serial.print(answer);
      Display.putstr(answer);
-  }*/
+  }
   
-
-}
+}*/
                        
-void goToSection(int section)
+/*void goToSection(int section)
 {
    currentPage = 1; // Reset the global page number to 1, since we're starting at the beginning of a section. Not 
    if (section <= NUM_SECTIONS)
@@ -683,6 +707,6 @@ void goToSection(int section)
       sectionNum = section;
       showPage();
    }
-}
+}*/
 
 
