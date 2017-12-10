@@ -19,12 +19,11 @@
 #include "errors.h"
 #include "session.h"
 #include "calculations.h"
-#include "keyboard.h"
 #include "bitmaps.h"
 #include "pageOperations.h"
 #include "buttons.h"
+#include "keyboard.h"
 #include "process.h"
-
 #define TFT_RST 8
 #define TFT_DC 9
 #define TFT_CS 10
@@ -32,7 +31,7 @@
 const int TxPin = 18; //TX1 on Mega
 
 Adafruit_ILI9340 screen = Adafruit_ILI9340(TFT_CS, TFT_DC, TFT_RST);
-SoftwareSerial mySerial = SoftwareSerial(255, TxPin);
+SoftwareSerial lcdScreen = SoftwareSerial(255, TxPin);
 //Keypad kpd;
 
 word x, y ; // Touchscreen coordinates (keeping this in case we need to resurrect the touchscreen later)
@@ -64,14 +63,14 @@ void setup()
   pinMode(TxPin, OUTPUT);
   digitalWrite(TxPin, HIGH);
   delay(100);
-  mySerial.begin(9600);
-  mySerial.write(12);                 // Clear             
-  mySerial.write(17);                 // Turn backlight on
-  delay(5);                           // Required delay
-  delay(3000);                        // Wait 3 seconds
-  mySerial.print("Welcome to your");  // First line
-  mySerial.write(13);                 // Carriage return
-  mySerial.print("Dialysis Buddy!");   // Second line
+  lcdScreen.begin(9600);
+  lcdScreen.write(12);                 // Clear             
+  lcdScreen.write(17);                 // Turn backlight on
+  delay(5);                            // Required delay
+  delay(3000);                         // Wait 3 seconds
+  lcdScreen.print("Welcome to your");  // First line
+  lcdScreen.write(13);                 // Carriage return
+  lcdScreen.print("Dialysis Buddy!");  // Second line
 
   bmpDraw("main.bmp", 0, 0); 
 
@@ -85,7 +84,8 @@ void loop()
    // Launch opening menu behavior
    int menuChoice = readButtons();
    delay(200) ;    
-   process(menuChoice);
+   if ((menuChoice > 0) && (menuChoice < 7))
+      process(menuChoice);
 }
 
 
