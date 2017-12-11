@@ -150,6 +150,7 @@ void processKeystroke(int n)
 void goHome() 
 {
   inHomePage = true;
+  Serial.print("why would I be in the goHome function?");
   bmpDraw("main.bmp", 0, 0); 
 }
 

@@ -37,10 +37,6 @@ int readButtons()
          currentSection == 4;
         // showPage();
       }
-      else
-      {
-         goHome();
-      }
       return 5;
    }
    if (adc_key_in < 546)
@@ -51,10 +47,6 @@ int readButtons()
          currentSection == 3;
         // showPage();
       }
-      else
-      {
-        goBack();
-      }
       return 4;
    }
    if (adc_key_in < 713)
@@ -64,10 +56,6 @@ int readButtons()
       {
          currentSection == 2;
          //showPage(); 
-      }
-      else
-      {
-        goNext();
       }
       return 3;
    }

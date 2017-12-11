@@ -72,6 +72,7 @@ void setup()
   lcdScreen.write(13);                 // Carriage return
   lcdScreen.print("Dialysis Buddy!");  // Second line
 
+  Serial.print("I can't be here...\n");
   bmpDraw("main.bmp", 0, 0); 
 
   //goHome();

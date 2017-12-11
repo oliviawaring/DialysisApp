@@ -27,10 +27,10 @@ void process(int n)
    Serial.print(inSetup);
    Serial.print("\nIn Treatment");
    Serial.print(inTreatment);
-   if ((n > 6) || (oneCycle))
-      return;
-   else
-      oneCycle = true;
+   //if ((n > 6) || (oneCycle))
+  //    return;
+  // else
+   //   oneCycle = true;
    if (inContent)
    {
       Serial.print("I am in content");
@@ -47,10 +47,11 @@ void process(int n)
             {
                 if (inSetupMenu) // I don't actually think I need this
                 {
+                    Serial.print("I should not be here\n");
                     bmpDraw("msetup.bmp", 0, 0);
                     inTail = false;
                     inContent = false;
-                    inSetup = true;
+                  //  inSetup = true;
                 }
                 else if (inTreatment)
                 {     
@@ -65,6 +66,7 @@ void process(int n)
                 else // in this case, we're in a tail not within a submenu, and the next step directly up is the homepage!!
                 // this is a mess, just fyi. But as long as it works. 
                 {
+                   Serial.print("T1\n");
                    bmpDraw("main.bmp", 0, 0);
                    inTail = false;
                    inHomePage = true;
@@ -74,6 +76,7 @@ void process(int n)
             }
             case 5:
             {
+               Serial.print("this is maddening\n");
                bmpDraw("main.bmp", 0, 0);
                inHomePage = true;
                inContent = false;
@@ -269,6 +272,8 @@ void process(int n)
                          sequenceNum--;
                          break;
                      }
+                     default:
+                         break;
                      // if we hit case 8 there's something wrong because this should have been flagged in the tail bit
                   }
                }
@@ -278,6 +283,7 @@ void process(int n)
                   {
                      case 1:
                      {
+                         Serial.print("T2\n");
                          bmpDraw("main.bmp", 0, 0);
                          sequenceNum--;
                          break;
@@ -310,6 +316,7 @@ void process(int n)
             }
             case 5:
             {
+               Serial.print("shouldn't be here\n");
                bmpDraw("main.bmp", 0, 0);
                inHomePage = true;
                inContent = false;
@@ -376,9 +383,11 @@ void process(int n)
           }
           case 5:
           {
+             Serial.print("gaaqaaaaaah\n");
              bmpDraw("mcommon.bmp", 0, 0);
              inHomePage = false; 
              inCommon = true;
+             inContent = false;
              break;
           }
           case 6:
@@ -401,52 +410,6 @@ void process(int n)
           }
        }
    }
-   /*else if (inTreatment)
-   {
-   // no... how am I handling the next button?
-   // we should probably draw this in somehow. I'll save it for later. 
-       Serial.print("ouch\n");
-      // bmpDraw("main.bmp", 0, 0); // might be the answer... have to re-display a bmp before text? so I can have a "processing" bmp? BUT WHY. I feel like this might be the same underlying problem...
-       // why is this findable in other parts of my code, but not here?!?
-       //screen.fillScreen(ILI9340_BLACK);
-      // screen.setCursor(0, 0);
-      // screen.setTextColor(ILI9340_WHITE);  
-      // screen.setTextSize(2);
-      // screen.println(num);
-       Serial.print(sequenceNum);
-       if (sequenceNum == 2)
-       {
-             Serial.print("am I here?");
-             screen.fillScreen(ILI9340_BLACK);
-             screen.setCursor(0, 0);
-             screen.setTextColor(ILI9340_WHITE);  
-             screen.setTextSize(1);
-             screen.println("Enter the patient's target weight (in kg) and press SELECT:");
-             char key = kpd.getKey(); 
-             lcdScreen.write(12);
-             currentSession.targetWeight = getNumber(key);
-             sequenceNum = 3;
-            // break;
-      }
-       /*   case 3:  
-          {  
-             screen.fillScreen(ILI9340_BLACK);
-             screen.setCursor(0, 0);
-             screen.setTextColor(ILI9340_WHITE);  
-             screen.setTextSize(1);
-             screen.println("Enter the patient's treatment time (in hours) and press SELECT: \n:");
-             char key = kpd.getKey(); 
-             lcdScreen.write(12);
-             currentSession.treatmentTime = getNumber(key);
-             sequenceNum = 4;
-             break;
-          }
-          default:
-          {
-             break;
-          }
-       }*/
-   //}
    else if (inSetupMenu)
    {
        Serial.print("I am in setup yay");
@@ -559,7 +522,6 @@ void process(int n)
              break;   
       }
    }
+   Serial.print("I am exiting this function.\n");
 }
 
-// Pretty much everything is messed up right now, I need to draw a chart and tackle this again later. 
-// Yeah I legitly ruined EVERYTHING. 
