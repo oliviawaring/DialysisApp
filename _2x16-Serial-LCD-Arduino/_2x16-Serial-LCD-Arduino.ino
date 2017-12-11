@@ -15,7 +15,7 @@ void setup() {
   delay(5);                           // Required delay
   delay(3000);                        // Wait 3 seconds
   mySerial.print("Hello, world...");  // First line
-  mySerial.write(13);                 // Form feed
+  mySerial.write(13);                 // Carriage Return
   mySerial.print("from Parallax!");   // Second line
   mySerial.write(212);                // Quarter note
   mySerial.write(220);                // A tone
