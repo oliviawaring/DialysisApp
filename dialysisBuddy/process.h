@@ -45,11 +45,12 @@ void process(int n)
             }
             case 4: //back - this is going to be REALLY irritating, because we have to account for all the different possibilities... I should draw a diagram
             {
-                if (inSetup)
+                if (inSetupMenu) // I don't actually think I need this
                 {
                     bmpDraw("msetup.bmp", 0, 0);
                     inTail = false;
                     inContent = false;
+                    inSetup = true;
                 }
                 else if (inTreatment)
                 {     
@@ -221,6 +222,7 @@ void process(int n)
                      case 1:
                      {
                          bmpDraw("msetup.bmp", 0, 0);
+                         inContent = false;
                          sequenceNum--;
                          break;
                      }
@@ -352,7 +354,7 @@ void process(int n)
           case 2:  
           {
              bmpDraw("msetup.bmp", 0, 0);
-             inSetup = true;
+             inSetupMenu = true;
              inHomePage = false; 
              break;
           }
@@ -445,7 +447,7 @@ void process(int n)
           }
        }*/
    //}
-   else if (inSetup)
+   else if (inSetupMenu)
    {
        Serial.print("I am in setup yay");
        switch(n)
@@ -455,42 +457,49 @@ void process(int n)
              Serial.print("Am I here? 2");
              bmpDraw("setup1.bmp", 0, 0);
              sequenceNum = 1;
-             //inContent = true;
+             inSetup = true;
+             inSetupMenu = false;
+             inContent = true;
              break;
           }
           case 2:  
           {
              bmpDraw("prime1.bmp", 0, 0);
              inTail = true;
-             //inContent = true;
+             inSetupMenu = true;
+             inContent = true;
              break;
           }
           case 3:
           {
              bmpDraw("connect1.bmp", 0, 0);
              inTail = true;
-             //inContent = true;
+             inSetupMenu = true;
+             inContent = true;
              break;
           }
           case 4:
           {
              bmpDraw("settings1.bmp", 0, 0);
              inTail = true;
-             //inContent = true;
+             inSetupMenu = true;
+             inContent = true;
              break;
           }
           case 5:
           {
              bmpDraw("launch1.bmp", 0, 0);
              inTail = true;
-             //inContent = true;
+             inSetupMenu = true;
+             inContent = true;
              break;
           }
           case 6:
           {
              bmpDraw("end1.bmp", 0, 0);
              inTail = true;
-             //inContent = true;
+             inSetupMenu = true;
+             inContent = true;
              break;
           }
           default:

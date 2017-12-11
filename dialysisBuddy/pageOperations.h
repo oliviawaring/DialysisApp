@@ -9,6 +9,7 @@ extern int sectionNum;
 extern boolean inHomePage;
 extern boolean oneCycle;
 boolean inSetup = false;
+boolean inSetupMenu = false;
 boolean inCommon = false;
 boolean inTail = false;
 boolean inTreatment = false;
