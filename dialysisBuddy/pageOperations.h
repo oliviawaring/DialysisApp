@@ -53,6 +53,8 @@ Page errorPages[2] = {{"Enter the error code (color and number) press SELECT: \n
                       {"Error code not found. Please try again. The correct format of an error code is a color (A for green, B for red) followed by an integer.", true, NULL}};                      
 */
 
+/*
+
 // A null Page
 Page nullPage = {"", false, NULL, 0};
 Page nullPages[2] = {nullPage, nullPage};
@@ -136,12 +138,12 @@ Section sections[NUM_SECTIONS] = {{p1, 3, nullSubsections},
                        {p4, 1, nullSubsections}, 
                        {p5, 1, common_subs},
                        {p6, 1, nullSubsections}};
+*/
 
 void processKeystroke(int n)
 {
   return; 
 }
-
 
 
 void goHome() 

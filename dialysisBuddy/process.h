@@ -2,6 +2,8 @@
 
 extern Keypad kpd;
 extern Adafruit_ILI9340 screen;
+extern SoftwareSerial lcdScreen;
+extern Session currentSession;
 double num = 0;
 
 void displayValue(double num)
@@ -31,6 +33,7 @@ void process(int n)
       oneCycle = true;
    if (inContent)
    {
+      Serial.print("I am in content");
       if (inTail)
       {
          switch(n)
@@ -38,31 +41,43 @@ void process(int n)
             case 1: case 2: case 3:
             {
                //nothing happens, there is no next capability
+               break;
             }
-            case 4: //back
+            case 4: //back - this is going to be REALLY irritating, because we have to account for all the different possibilities... I should draw a diagram
             {
                 if (inSetup)
                 {
                     bmpDraw("setup7.bmp", 0, 0);
                     sequenceNum--;
                     inTail = false;
+                    break;
                 }
-                else
-                {
+                else if (inTreatment)
+                {     
                     // man I really gotta figure this one out... NEED to get these bmps working though... 
+                    break;
                 }
+                //else if () // in a certain submenu
+               // {
+                
+                //}
+                else // in this case, we're in a tail, and the next step directly up is the homepage!!
+                   break;
+                break;
             }
             case 5:
             {
                bmpDraw("main.bmp", 0, 0);
                inHomePage = true;
                inContent = false;
+               break;
             }
             case 6:
             {
                bmpDraw("mhelp.bmp", 0, 0);
                inHelp = true;
                // should the help page count as being in content?
+               break;
             }
             default:
             {
@@ -72,16 +87,20 @@ void process(int n)
       }
       else
       {
+         Serial.print("I am not in tail");
          switch(n)
          {
             case 1: case 2:
             {
                // these buttons do nothing
+               break;
             }
-            case 3:
+            case 3: // next
             {
+               Serial.print("I am in next");
                if (inSetup)
                {
+                  Serial.print("I am in setup");
                   switch(sequenceNum)
                   {
                      Serial.print("Life is hard");
@@ -89,36 +108,50 @@ void process(int n)
                      {
                          bmpDraw("setup2.bmp", 0, 0);
                          sequenceNum++;
+                         break;
                      }
                      case 2:
                      {
                          bmpDraw("setup3.bmp", 0, 0);
                          sequenceNum++;
+                         break;
                      }
                      case 3:
                      {
+                         Serial.print("why am I here???");
                          bmpDraw("setup4.bmp", 0, 0);
                          sequenceNum++;
+                         break;
                      }
                      case 4:
                      {
                          bmpDraw("setup5.bmp", 0, 0);
                          sequenceNum++;
+                         break;
                      }
                      case 5:
                      {
                          bmpDraw("setup6.bmp", 0, 0);
                          sequenceNum++;
+                         break;
                      }
                      case 6:
                      {
                          bmpDraw("setup7.bmp", 0, 0);
                          sequenceNum++;
+                         break;
                      }
                      case 7:
                      {
                          bmpDraw("setup8.bmp", 0, 0);
                          inTail = true;
+                         break;
+                     }
+                     case 8:
+                     {
+                         bmpDraw("setup8.bmp", 0, 0);
+                         inTail = true;
+                         break;
                      }
                      default:
                      {
@@ -126,11 +159,13 @@ void process(int n)
                      }
                   }
                }
+               break;
             }
-            case 4:
+            case 4: // back
             {            
                if (inSetup)
                {
+                  Serial.print("I am in content");
                   switch(sequenceNum)
                   {
                      case 1:
@@ -175,9 +210,17 @@ void process(int n)
                          sequenceNum--;
                          break;
                      }
+                     case 8:
+                     {
+                         bmpDraw("setup7.bmp", 0, 0);
+                         sequenceNum--;
+                         inTail = false;
+                         break;
+                     }
                      // if we hit case 8 there's something wrong because this should have been flagged in the tail bit
                   }
                }
+               break;
             }
             case 5:
             {
@@ -208,7 +251,6 @@ void process(int n)
        {
           case 1:
           {
-            
              Serial.print("here!");
              inTreatment = true;
            //  screen.text("Enter the patient's current weight (in kg) and press SELECT: \n",0,0);
@@ -216,20 +258,26 @@ void process(int n)
              screen.setCursor(0, 0);
              screen.setTextColor(ILI9340_WHITE);  
              screen.setTextSize(2);
-             screen.println("Enter the patient's current weight (in kg) and press SELECT:");
-             sequenceNum = 1;
-             char key = 0;
-             Serial.print("before");
-             //key = kpd.getKey(); 
-             //oh my god... getting inputs from keypad makes it no longer possible for the screen to display... hot damn. What now. 
-             int menuChoice = readButtons();
-             Serial.print("after");
-             //int menuChoice = readButtons(); // ugggh this feels vurrry dangerous...
+             screen.println("Enter the patient's current weight (in kg) and press SELECT (orange button).\n\nThen enter the patient's target weight.");
+             char key = kpd.getKey(); 
+             lcdScreen.write(12);
+             currentSession.currentWeight = getNumber(key);
+             Serial.print("after\n");
+             Serial.print(currentSession.currentWeight);
+             sequenceNum = 2;
+
+             Serial.print("am I here?");
+           /*  screen.fillScreen(ILI9340_BLACK);
+             screen.setCursor(0, 0);
+             screen.setTextColor(ILI9340_WHITE);  
+             screen.setTextSize(1);
+             screen.println("Enter the patient's target weight (in kg) and press SELECT:");*/
+             key = kpd.getKey(); 
+             lcdScreen.write(12);
+             currentSession.targetWeight = getNumber(key);
+             sequenceNum = 3;
              
-             int postDecVal = 0; 
-             // I know this is all ugly and redundant and could be SO much more elegant, but that's why we're doing this... Trying to modularize is what got us into trouble in the first place
-             
-             while (menuChoice != 1)
+            /* while (menuChoice != 1)
              {
              if(key)
                 {
@@ -282,7 +330,8 @@ void process(int n)
                 Serial.print(menuChoice);
                 key = kpd.getKey();
              }
-             Serial.print(num);
+             Serial.print(num);*/
+            
 
              currentSession.currentWeight = num;
             // displayValue(num); 
@@ -293,20 +342,24 @@ void process(int n)
           }
           case 2:  
           {
-             bmpDraw("msetup2.bmp", 0, 0);
+             bmpDraw("msetup.bmp", 0, 0);
              inSetup = true;
              inHomePage = false; 
              break;
           }
           case 3:
           {
-             bmpDraw("mlaunch.bmp", 0, 0);
+             bmpDraw("launch1.bmp", 0, 0);
+             inContent = true;
+             inTail = true;
              inHomePage = false; 
              break;
           }
           case 4:
           {
-             bmpDraw("mend.bmp", 0, 0);
+             bmpDraw("end1.bmp", 0, 0);
+             inContent = true;
+             inTail = true;
              inHomePage = false; 
              break;
           }
@@ -337,83 +390,102 @@ void process(int n)
           }
        }
    }
-   else if (inTreatment)
+   /*else if (inTreatment)
    {
    // no... how am I handling the next button?
    // we should probably draw this in somehow. I'll save it for later. 
-       Serial.print("ouch");
-       bmpDraw("main.bmp", 0, 0); // might be the answer... have to re-display a bmp before text? so I can have a "processing" bmp? BUT WHY. I feel like this might be the same underlying problem...
+       Serial.print("ouch\n");
+      // bmpDraw("main.bmp", 0, 0); // might be the answer... have to re-display a bmp before text? so I can have a "processing" bmp? BUT WHY. I feel like this might be the same underlying problem...
        // why is this findable in other parts of my code, but not here?!?
-       screen.fillScreen(ILI9340_BLACK);
-       screen.setCursor(0, 0);
-       screen.setTextColor(ILI9340_WHITE);  
-       screen.setTextSize(2);
-       screen.println(num);
-       switch(sequenceNum)
+       //screen.fillScreen(ILI9340_BLACK);
+      // screen.setCursor(0, 0);
+      // screen.setTextColor(ILI9340_WHITE);  
+      // screen.setTextSize(2);
+      // screen.println(num);
+       Serial.print(sequenceNum);
+       if (sequenceNum == 2)
        {
-          case 2:
-          {
-             //screen.text("Enter the patient's current weight (in kg) and press SELECT: \n",0,0);
+             Serial.print("am I here?");
              screen.fillScreen(ILI9340_BLACK);
              screen.setCursor(0, 0);
              screen.setTextColor(ILI9340_WHITE);  
              screen.setTextSize(1);
-             screen.println("Enter the patient's current weight (in kg) and press SELECT:");
-             sequenceNum++;
+             screen.println("Enter the patient's target weight (in kg) and press SELECT:");
              char key = kpd.getKey(); 
+             lcdScreen.write(12);
              currentSession.targetWeight = getNumber(key);
-             break;
-          }
-          case 3:  
-          {
+             sequenceNum = 3;
+            // break;
+      }
+       /*   case 3:  
+          {  
+             screen.fillScreen(ILI9340_BLACK);
+             screen.setCursor(0, 0);
+             screen.setTextColor(ILI9340_WHITE);  
+             screen.setTextSize(1);
+             screen.println("Enter the patient's treatment time (in hours) and press SELECT: \n:");
+             char key = kpd.getKey(); 
+             lcdScreen.write(12);
+             currentSession.treatmentTime = getNumber(key);
+             sequenceNum = 4;
              break;
           }
           default:
           {
              break;
           }
-       }
-   }
+       }*/
+   //}
    else if (inSetup)
    {
-       inSetup = false;
-       inContent = true;
+       Serial.print("I am in setup yay");
        switch(n)
        {
           case 1:
           {
              bmpDraw("setup1.bmp", 0, 0);
              sequenceNum = 1;
+             inContent = true;
              break;
           }
           case 2:  
           {
              bmpDraw("prime1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 3:
           {
              bmpDraw("connect1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 4:
           {
              bmpDraw("settings1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 5:
           {
              bmpDraw("launch1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           case 6:
           {
              bmpDraw("end1.bmp", 0, 0);
              inTail = true;
+             inSetup = false;
+             inContent = true;
              break;
           }
           default:

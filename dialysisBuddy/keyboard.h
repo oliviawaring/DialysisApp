@@ -2,6 +2,7 @@
 
 //extern Picaso_Serial_4DLib Display;
 extern Adafruit_ILI9340 screen;
+extern SoftwareSerial lcdScreen;
 
 const byte ROWS = 4; // Four rows on our keypad
 const byte COLS = 3; // Four columns on our keypad 
@@ -21,14 +22,12 @@ byte colPins[COLS] = { 49, 53, 45 };
 // Initialize the keypad
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
-
-
-
 double getNumber(char key)
 {
    double num = 0;
    int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
-   while (key != 'D') // we have to change this to a button press, eventually... dayum, that's going to be complicated HOW AM I GOING TO DO THIS OMG
+   int menuChoice = readButtons();
+   while (menuChoice != 1) // we have to change this to a button press, eventually... dayum, that's going to be complicated HOW AM I GOING TO DO THIS OMG
    // it's okay... i was gonna have to overhaul this anyway, cuz it can't be the D thing...
    {
       if(key)
@@ -53,32 +52,27 @@ double getNumber(char key)
                char value[] = {key, '\0'};
                Serial.print(value);
                Serial.print("are we here?");
-               screen.fillScreen(ILI9340_RED);
+               //screen.fillScreen(ILI9340_RED);
               /* screen.setCursor(100, 100);
                screen.setTextColor(ILI9340_WHITE);  
                screen.setTextSize(4);
                screen.println("hi");*/
-//               Display.putstr(value); 
+               lcdScreen.print(value); 
                Serial.print("why are we not printing?");
                break;
             }
             case '.': 
                postDecVal++;
-               screen.print(".");
-//               Display.putstr(".");
+               lcdScreen.print(".");
                break;
-            case 'A': 
-               // this is going to have to read as green at some point...
-               break;
-            case 'B': 
-               // and this will eventually represent red... AAAH. 
-               break;
-            case '#': case 'C': case 'D':
+            case '#': 
                return num;
                break;
          }
       }
       key = kpd.getKey();
+      menuChoice = readButtons();
+      Serial.print(num);
    }
    return num;
 }

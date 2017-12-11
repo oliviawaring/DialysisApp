@@ -11,6 +11,7 @@
 #include <SD.h>       // this is needed for display
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ILI9340.h>
+#include <SoftwareSerial.h>
 #include <Keypad.h>
 #include "Math.h"
 #include "page.h"
@@ -18,18 +19,19 @@
 #include "errors.h"
 #include "session.h"
 #include "calculations.h"
-#include "keyboard.h"
 #include "bitmaps.h"
 #include "pageOperations.h"
 #include "buttons.h"
+#include "keyboard.h"
 #include "process.h"
-
 #define TFT_RST 8
 #define TFT_DC 9
 #define TFT_CS 10
 #define SD_CS 4
+const int TxPin = 18; //TX1 on Mega
 
 Adafruit_ILI9340 screen = Adafruit_ILI9340(TFT_CS, TFT_DC, TFT_RST);
+SoftwareSerial lcdScreen = SoftwareSerial(255, TxPin);
 //Keypad kpd;
 
 word x, y ; // Touchscreen coordinates (keeping this in case we need to resurrect the touchscreen later)
@@ -45,7 +47,6 @@ int currentSubsection = 0;
 void setup()
 {
   Serial.begin(9600);
-
   pinMode(SD_CS, OUTPUT);
   digitalWrite(SD_CS, HIGH);
   
@@ -57,9 +58,23 @@ void setup()
     Serial.println("failed!");
     return;
   }
+  
   Serial.println("OK!");
+  pinMode(TxPin, OUTPUT);
+  digitalWrite(TxPin, HIGH);
+  delay(100);
+  lcdScreen.begin(9600);
+  lcdScreen.write(12);                 // Clear             
+  lcdScreen.write(17);                 // Turn backlight on
+  delay(5);                            // Required delay
+  delay(3000);                         // Wait 3 seconds
+  lcdScreen.print("Welcome to your");  // First line
+  lcdScreen.write(13);                 // Carriage return
+  lcdScreen.print("Dialysis Buddy!");  // Second line
 
-  goHome();
+  bmpDraw("main.bmp", 0, 0); 
+
+  //goHome();
   
 } // end Setup **do not alter, remove or duplicate this line**
 
@@ -67,10 +82,10 @@ void setup()
 void loop()
 {  
    // Launch opening menu behavior
-   //inHomePage = true;
    int menuChoice = readButtons();
    delay(200) ;    
-   process(menuChoice);
+   if ((menuChoice > 0) && (menuChoice < 7))
+      process(menuChoice);
 }
 
 
