@@ -24,11 +24,11 @@ Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 double getNumber(char key)
 {
-   double num = 0;
+   double num1 = 0;
+   double num2 = 0;
    int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
    int menuChoice = readButtons();
-   while (menuChoice != 1) // we have to change this to a button press, eventually... dayum, that's going to be complicated HOW AM I GOING TO DO THIS OMG
-   // it's okay... i was gonna have to overhaul this anyway, cuz it can't be the D thing...
+   while (menuChoice != 1) 
    {
       if(key)
       {
@@ -44,11 +44,11 @@ double getNumber(char key)
                if (postDecVal > 0)
                {
                   double decimalBit = exponentiate(0.1, postDecVal);
-                  num = num + ((key - '0') * exponentiate(0.1, postDecVal));
+                  num1 = num1 + ((key - '0') * exponentiate(0.1, postDecVal));
                   postDecVal++;
                }
                else 
-                  num = num * 10 + (key - '0');
+                  num1 = num1 * 10 + (key - '0');
                char value[] = {key, '\0'};
                Serial.print(value);
                Serial.print("are we here?");
@@ -66,15 +66,15 @@ double getNumber(char key)
                lcdScreen.print(".");
                break;
             case '#': 
-               return num;
+               return num1;
                break;
          }
       }
       key = kpd.getKey();
       menuChoice = readButtons();
-      Serial.print(num);
+      Serial.print(num1);
    }
-   return num;
+   return num1;
 }
 
 

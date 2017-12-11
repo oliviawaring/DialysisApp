@@ -47,22 +47,28 @@ void process(int n)
             {
                 if (inSetup)
                 {
-                    bmpDraw("setup7.bmp", 0, 0);
-                    sequenceNum--;
+                    bmpDraw("msetup.bmp", 0, 0);
                     inTail = false;
-                    break;
+                    inContent = false;
                 }
                 else if (inTreatment)
                 {     
                     // man I really gotta figure this one out... NEED to get these bmps working though... 
-                    break;
                 }
-                //else if () // in a certain submenu
-               // {
-                
-                //}
-                else // in this case, we're in a tail, and the next step directly up is the homepage!!
-                   break;
+                else if (inCommon) 
+                {
+                    bmpDraw("mcommon.bmp", 0, 0);
+                    inTail = false;
+                    inContent = false;
+                }
+                else // in this case, we're in a tail not within a submenu, and the next step directly up is the homepage!!
+                // this is a mess, just fyi. But as long as it works. 
+                {
+                   bmpDraw("main.bmp", 0, 0);
+                   inTail = false;
+                   inHomePage = true;
+                   inContent = false;
+                }
                 break;
             }
             case 5:
@@ -70,12 +76,20 @@ void process(int n)
                bmpDraw("main.bmp", 0, 0);
                inHomePage = true;
                inContent = false;
+               inCommon = false;
+               inSetup = false;
+               inTreatment = false;
                break;
             }
             case 6:
             {
                bmpDraw("mhelp.bmp", 0, 0);
                inHelp = true;
+               inHomePage = false;
+               inContent = false;
+               inCommon = false;
+               inSetup = false;
+               inTreatment = false;
                // should the help page count as being in content?
                break;
             }
@@ -90,11 +104,49 @@ void process(int n)
          Serial.print("I am not in tail");
          switch(n)
          {
-            case 1: case 2:
+            case 1: 
             {
-               // these buttons do nothing
+               if (inTreatment)
+               {
+                  switch(sequenceNum)
+                  {
+                     case 1:
+                     {
+                         bmpDraw("tweight.bmp", 0, 0); // WHY is this not displaying. I think I keep bumping up against variations of the same problem... Maybe it is a memory issue?
+                         char key = kpd.getKey(); 
+                         lcdScreen.write(12);
+                         currentSession.targetWeight = getNumber(key);
+                         sequenceNum++;
+                         break;
+                     }
+                     case 2:
+                     {
+                         bmpDraw("time.bmp", 0, 0);
+                         char key = kpd.getKey(); 
+                         lcdScreen.write(12);
+                         currentSession.treatmentTime = getNumber(key);
+                         sequenceNum++;
+                         break;
+                     }
+                     case 3:
+                     {
+                         bmpDraw("disp_uf.bmp", 0, 0);
+                         lcdScreen.write(12);
+                         calculateUltraFiltrationRate();
+                         lcdScreen.print(currentSession.ufRate);  
+                         sequenceNum++;
+                         break;
+                     }
+                     default:
+                     {
+                        break;
+                     }
+                  }
+               }
                break;
             }
+            case 2:
+               break;
             case 3: // next
             {
                Serial.print("I am in next");
@@ -144,13 +196,11 @@ void process(int n)
                      case 7:
                      {
                          bmpDraw("setup8.bmp", 0, 0);
-                         inTail = true;
                          break;
                      }
                      case 8:
                      {
                          bmpDraw("setup8.bmp", 0, 0);
-                         inTail = true;
                          break;
                      }
                      default:
@@ -176,6 +226,7 @@ void process(int n)
                      }
                      case 2:
                      {
+                         Serial.print("Am I here? 1");
                          bmpDraw("setup1.bmp", 0, 0);
                          sequenceNum--;
                          break;
@@ -214,10 +265,43 @@ void process(int n)
                      {
                          bmpDraw("setup7.bmp", 0, 0);
                          sequenceNum--;
-                         inTail = false;
                          break;
                      }
                      // if we hit case 8 there's something wrong because this should have been flagged in the tail bit
+                  }
+               }
+               else if (inTreatment)
+               {
+                  switch(sequenceNum)
+                  {
+                     case 1:
+                     {
+                         bmpDraw("main.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     case 2:
+                     {
+                         bmpDraw("cweight.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     case 3:
+                     {
+                         bmpDraw("tweight.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                      case 4:
+                     {
+                         bmpDraw("time.bmp", 0, 0);
+                         sequenceNum--;
+                         break;
+                     }
+                     default:
+                     {
+                        break;
+                     }
                   }
                }
                break;
@@ -254,91 +338,16 @@ void process(int n)
              Serial.print("here!");
              inTreatment = true;
            //  screen.text("Enter the patient's current weight (in kg) and press SELECT: \n",0,0);
-             screen.fillScreen(ILI9340_BLACK);
-             screen.setCursor(0, 0);
-             screen.setTextColor(ILI9340_WHITE);  
-             screen.setTextSize(2);
-             screen.println("Enter the patient's current weight (in kg) and press SELECT (orange button).\n\nThen enter the patient's target weight.");
+             bmpDraw("cweight.bmp", 0, 0);
              char key = kpd.getKey(); 
              lcdScreen.write(12);
              currentSession.currentWeight = getNumber(key);
              Serial.print("after\n");
              Serial.print(currentSession.currentWeight);
-             sequenceNum = 2;
-
-             Serial.print("am I here?");
-           /*  screen.fillScreen(ILI9340_BLACK);
-             screen.setCursor(0, 0);
-             screen.setTextColor(ILI9340_WHITE);  
-             screen.setTextSize(1);
-             screen.println("Enter the patient's target weight (in kg) and press SELECT:");*/
-             key = kpd.getKey(); 
-             lcdScreen.write(12);
-             currentSession.targetWeight = getNumber(key);
-             sequenceNum = 3;
-             
-            /* while (menuChoice != 1)
-             {
-             if(key)
-                {
-                   Serial.print("\nlettuce");
-                   Serial.print(key);
-                   switch (key) 
-                   {           
-                      case NO_KEY:
-                         break;
-                      case '0': case '1': case '2': case '3': case '4':
-                      case '5': case '6': case '7': case '8': case '9':
-                      {
-                         // there seems to constantly be a 1 in front of this... and none of the 2's, 5's, or 8's work. 
-                         if (postDecVal > 0)
-                         {
-                            double decimalBit = exponentiate(0.1, postDecVal);
-                            num = num + ((key - '0') * exponentiate(0.1, postDecVal));
-                            postDecVal++;
-                         }
-                         else 
-                            num = num * 10 + (key - '0');
-                         char value[] = {key, '\0'};
-                         Serial.print(value);
-                         Serial.print("are we here?");
-                         //screen.setCursor(10, 10);
-                         //screen.setTextColor(ILI9340_WHITE);  
-                        // screen.setTextSize(4);
-                       //  screen.println("hi");
-             //               Display.putstr(value); 
-                         Serial.print("why are we not printing?");
-                         break;
-                      }
-                      case '.': 
-                         postDecVal++;
-                         screen.print(".");
-//                           Display.putstr(".");
-                         break;
-                      case 'A': 
-                            // this is going to have to read as green at some point...
-                         break;
-                      case 'B': 
-                            // and this will eventually represent red... AAAH. 
-                         break;
-                      case '#': case 'C': case 'D':
-                         return num;
-                         break;
-                   }
-                }
-                menuChoice = readButtons();
-                Serial.print(menuChoice);
-                key = kpd.getKey();
-             }
-             Serial.print(num);*/
-            
-
-             currentSession.currentWeight = num;
-            // displayValue(num); 
+             sequenceNum = 1; 
              inHomePage = false; 
-             Serial.print("\nwhy no loop???");
+             inContent = true;
              break;
-             // WHY ARE WE NO LONGER IN THE LOOP. Okay, we're back. it's the display value thing. that's VERY unfortunate. Maybe we can print it on the next go-round?
           }
           case 2:  
           {
@@ -443,49 +452,45 @@ void process(int n)
        {
           case 1:
           {
+             Serial.print("Am I here? 2");
              bmpDraw("setup1.bmp", 0, 0);
              sequenceNum = 1;
-             inContent = true;
+             //inContent = true;
              break;
           }
           case 2:  
           {
              bmpDraw("prime1.bmp", 0, 0);
              inTail = true;
-             inSetup = false;
-             inContent = true;
+             //inContent = true;
              break;
           }
           case 3:
           {
              bmpDraw("connect1.bmp", 0, 0);
              inTail = true;
-             inSetup = false;
-             inContent = true;
+             //inContent = true;
              break;
           }
           case 4:
           {
              bmpDraw("settings1.bmp", 0, 0);
              inTail = true;
-             inSetup = false;
-             inContent = true;
+             //inContent = true;
              break;
           }
           case 5:
           {
              bmpDraw("launch1.bmp", 0, 0);
              inTail = true;
-             inSetup = false;
-             inContent = true;
+             //inContent = true;
              break;
           }
           case 6:
           {
              bmpDraw("end1.bmp", 0, 0);
              inTail = true;
-             inSetup = false;
-             inContent = true;
+             //inContent = true;
              break;
           }
           default:
@@ -496,46 +501,56 @@ void process(int n)
    }
    else if (inCommon)
    {
-       inCommon = false;
-       inContent = true;
        switch(n)
        {
           case 1:
           {
              bmpDraw("hypo1.bmp", 0, 0);
+             inTail = true;
+             inContent = true;
+             break;
           }
           case 2:  
           {
              bmpDraw("bolus1.bmp", 0, 0);
              inTail = true;
+             inContent = true;
+             break;
           }
           case 3:
           {
              bmpDraw("clot1.bmp", 0, 0);
              inTail = true;
+             inContent = true;
+             break;
           }
           case 4:
           {
              bmpDraw("remove1.bmp", 0, 0);
              inTail = true;
+             inContent = true;
+             break;
           }
           case 5:
           {
+             Serial.print("WHY ISN'T THIS WORKING");
              bmpDraw("fluid1.bmp", 0, 0);
+             inContent = true;
              inTail = true;
+             break;
           }
           case 6:
           {
              bmpDraw("lab1.bmp", 0, 0);
              inTail = true;
-          }
-          default:
-          {
+             inContent = true;
              break;
           }
+          default:
+             break;   
       }
    }
 }
 
-
-
+// Pretty much everything is messed up right now, I need to draw a chart and tackle this again later. 
+// Yeah I legitly ruined EVERYTHING. 
