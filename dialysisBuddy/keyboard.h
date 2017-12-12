@@ -3,6 +3,7 @@
 //extern Picaso_Serial_4DLib Display;
 extern Adafruit_ILI9340 screen;
 extern SoftwareSerial lcdScreen;
+extern int globalButton;
 
 const byte ROWS = 4; // Four rows on our keypad
 const byte COLS = 3; // Four columns on our keypad 
@@ -28,7 +29,7 @@ double getNumber(char key)
    double num2 = 0;
    int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
    int menuChoice = readButtons();
-   while (menuChoice != 1) 
+   while (key != 0) 
    {
       if(key)
       {
@@ -75,6 +76,7 @@ double getNumber(char key)
       Serial.print(num1);
    }
    return num1;
+   globalButton = key;
 }
 
 

@@ -5,6 +5,7 @@ extern Adafruit_ILI9340 screen;
 extern SoftwareSerial lcdScreen;
 extern Session currentSession;
 double num = 0;
+int globalButton = 0;
 
 void displayValue(double num)
 {
@@ -116,19 +117,60 @@ void process(int n)
                   {
                      case 1:
                      {
-                         bmpDraw("tweight.bmp", 0, 0); // WHY is this not displaying. I think I keep bumping up against variations of the same problem... Maybe it is a memory issue?
                          char key = kpd.getKey(); 
                          lcdScreen.write(12);
-                         currentSession.targetWeight = getNumber(key);
+                         double num = 0;
+                         int postDecVal = 0; // Tracks whether we have added a decimal point yet
+                         int menuChoice = readButtons();
+                         while (menuChoice != 1) 
+                         {
+                           if(key)
+                           {
+                              switch (key) 
+                              {           
+                                 case NO_KEY:
+                                    break;
+                                 case '0': case '1': case '2': case '3': case '4':
+                                 case '5': case '6': case '7': case '8': case '9':
+                                 {
+                                    if (postDecVal > 0)
+                                    {
+                                       double decimalBit = exponentiate(0.1, postDecVal);
+                                       num = num + ((key - '0') * exponentiate(0.1, postDecVal));
+                                       postDecVal++;
+                                    }
+                                    else 
+                                       num = num * 10 + (key - '0');
+                                    char value[] = {key, '\0'};
+                                    lcdScreen.print(value); 
+                                    break;
+                                 }
+                                 case '.': 
+                                 {
+                                    postDecVal++;
+                                    lcdScreen.print(".");
+                                    break;
+                                 }
+                               }
+                            }
+                            key = kpd.getKey();
+                            menuChoice = readButtons();
+                            Serial.print(num);
+                         }
+                         currentSession.targetWeight = num;
+                         bmpDraw("tweight.bmp", 0, 0); // WHY is this not displaying. I think I keep bumping up against variations of the same problem... Maybe it is a memory issue?
+                         //char key = kpd.getKey(); 
+                         lcdScreen.write(12);
+                        // currentSession.targetWeight = getNumber();
                          sequenceNum++;
                          break;
                      }
                      case 2:
                      {
                          bmpDraw("time.bmp", 0, 0);
-                         char key = kpd.getKey(); 
+                         //char key = kpd.getKey(); 
                          lcdScreen.write(12);
-                         currentSession.treatmentTime = getNumber(key);
+                        // currentSession.treatmentTime = getNumber();
                          sequenceNum++;
                          break;
                      }
@@ -296,6 +338,7 @@ void process(int n)
                      }
                      case 3:
                      {
+                         Serial.print("\nhelloooo");
                          bmpDraw("tweight.bmp", 0, 0);
                          sequenceNum--;
                          break;
@@ -350,12 +393,57 @@ void process(int n)
              bmpDraw("cweight.bmp", 0, 0);
              char key = kpd.getKey(); 
              lcdScreen.write(12);
-             currentSession.currentWeight = getNumber(key);
+             //currentSession.currentWeight = getNumber(key);
+             double num = 0;
+             int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
+             int menuChoice = readButtons();
+             while (menuChoice != 1) 
+             {
+               if(key)
+               {
+                  Serial.print("\nlettuce");
+                  Serial.print(key);
+                  switch (key) 
+                  {           
+                     case NO_KEY:
+                        break;
+                     case '0': case '1': case '2': case '3': case '4':
+                     case '5': case '6': case '7': case '8': case '9':
+                     {
+                        if (postDecVal > 0)
+                        {
+                           double decimalBit = exponentiate(0.1, postDecVal);
+                           num = num + ((key - '0') * exponentiate(0.1, postDecVal));
+                           postDecVal++;
+                        }
+                        else 
+                           num = num * 10 + (key - '0');
+                        char value[] = {key, '\0'};
+                        Serial.print(value);
+                        Serial.print("are we here?");
+                        lcdScreen.print(value); 
+                        Serial.print("why are we not printing?");
+                        break;
+                     }
+                     case '.': 
+                     {
+                        postDecVal++;
+                        lcdScreen.print(".");
+                        break;
+                     }
+                   }
+                }
+                key = kpd.getKey();
+                menuChoice = readButtons();
+                Serial.print(num);
+             }
+             currentSession.currentWeight = num;
              Serial.print("after\n");
              Serial.print(currentSession.currentWeight);
              sequenceNum = 1; 
              inHomePage = false; 
              inContent = true;
+             //n = globalButton;
              break;
           }
           case 2:  
@@ -393,12 +481,7 @@ void process(int n)
           case 6:
           {
              inErrors = true;
-             screen.fillScreen(ILI9340_BLACK);
-             screen.setCursor(0, 0);
-             screen.setTextColor(ILI9340_WHITE);  
-             screen.setTextSize(1);
-             screen.println("Enter the error code (color and number) press SELECT: \n");
-             sequenceNum = 1;
+             bmpDraw("ecode.bmp", 0, 0);
              char key = kpd.getKey(); 
              getErrorCode(key);
              inHomePage = false; 
