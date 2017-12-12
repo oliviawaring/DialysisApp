@@ -542,9 +542,75 @@ void process(int n)
           {
              inErrors = true;
              bmpDraw("ecode.bmp", 0, 0);
+             lcdScreen.write(12); // Clear
+             lcdScreen.print("Error code:");  // First line
+             lcdScreen.write(13);
              char key = kpd.getKey(); 
-             getErrorCode(key);
+             ErrorCode ec = {'0', 0, false};
+             int num = 0;
+             boolean gotColor = false;
+             int menuChoice = readButtons();
+             int gotNum = 0;
+             while (menuChoice != 1) // we have to change this to a button press, eventually... dayum, that's going to be complicated
+             {
+                if(key)
+                {
+                   Serial.print(key);
+                   switch (key) 
+                   {
+           
+                      case NO_KEY:
+                         break;
+                      case '0': case '1': case '2': case '3': case '4':
+                      case '5': case '6': case '7': case '8': case '9':
+                      {
+                         Serial.print("so confused");
+                         if ((!gotColor) || (gotNum > 2))
+                         {
+                            Serial.print("Bad");
+ // Get out of the function entirely - need to try again (maybe there should actually be a subroutine asking for the color...
+                         }
+                         Serial.print("safe");
+                         num = num * 10 + (key - '0');
+                         char value[] = {key, '\0'};  
+                         lcdScreen.print(value);
+//                         Display.putstr(value); 
+                         gotNum++;
+                         break;
+                      }
+                      case '.': 
+                      {
+                         Serial.print("case A");
+                         if (gotColor)
+                            return ec; // too many color codes! 
+                         ec.color = 'Y'; // Green error code! 
+                         gotColor = !gotColor;
+                         lcdScreen.print("Yellow ");
+//                         Display.putstr("Green ");
+                         break;
+                      }
+                      case '#': 
+                      {
+                         if (gotColor)
+                            return ec; // too many color codes! 
+                         ec.color = 'R'; // Red error code! 
+                         gotColor = !gotColor;
+                         lcdScreen.print("Red ");
+        //                 Display.putstr("Red ");
+                         break;
+                      }
+                      default:
+                         break;
+                   }
+                }
+                menuChoice = readButtons();
+                key = kpd.getKey();
+             }
+             Serial.print("did i leave?");
+             ec.num = num;
+             ec.complete = true;
              inHomePage = false; 
+             bmpDraw("r010_1.bmp", 0, 0);
              break;
           }
           default:
