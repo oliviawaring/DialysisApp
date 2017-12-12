@@ -117,15 +117,22 @@ void process(int n)
                   {
                      case 1:
                      {
+                         
+                         lcdScreen.write(12); // Clear
+                         lcdScreen.print("Target weight:");  // First line
+                         lcdScreen.write(13);                 // Carriage return
+                         //bmpDraw("tweight.bmp", 0, 0); // WHY is this not displaying. I think I keep bumping up against variations of the same problem... Maybe it is a memory issue?
+                         //char key = kpd.getKey(); 
                          char key = kpd.getKey(); 
-                         lcdScreen.write(12);
                          double num = 0;
-                         int postDecVal = 0; // Tracks whether we have added a decimal point yet
+                         int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
                          int menuChoice = readButtons();
                          while (menuChoice != 1) 
                          {
                            if(key)
                            {
+                              Serial.print("\nlettuce");
+                              Serial.print(key);
                               switch (key) 
                               {           
                                  case NO_KEY:
@@ -142,7 +149,10 @@ void process(int n)
                                     else 
                                        num = num * 10 + (key - '0');
                                     char value[] = {key, '\0'};
+                                    Serial.print(value);
+                                    Serial.print("are we here?");
                                     lcdScreen.print(value); 
+                                    Serial.print("why are we not printing?");
                                     break;
                                  }
                                  case '.': 
@@ -158,26 +168,67 @@ void process(int n)
                             Serial.print(num);
                          }
                          currentSession.targetWeight = num;
-                         bmpDraw("tweight.bmp", 0, 0); // WHY is this not displaying. I think I keep bumping up against variations of the same problem... Maybe it is a memory issue?
-                         //char key = kpd.getKey(); 
-                         lcdScreen.write(12);
-                        // currentSession.targetWeight = getNumber();
                          sequenceNum++;
                          break;
                      }
                      case 2:
                      {
-                         bmpDraw("time.bmp", 0, 0);
-                         //char key = kpd.getKey(); 
-                         lcdScreen.write(12);
-                        // currentSession.treatmentTime = getNumber();
+                         lcdScreen.write(12); // Clear
+                         lcdScreen.print("Treatment time:");  // First line
+                         lcdScreen.write(13);                 // Carriage return
+                         char key = kpd.getKey(); 
+                         double num = 0;
+                         int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
+                         int menuChoice = readButtons();
+                         while (menuChoice != 1) 
+                         {
+                           if(key)
+                           {
+                              Serial.print("\nlettuce");
+                              Serial.print(key);
+                              switch (key) 
+                              {           
+                                 case NO_KEY:
+                                    break;
+                                 case '0': case '1': case '2': case '3': case '4':
+                                 case '5': case '6': case '7': case '8': case '9':
+                                 {
+                                    if (postDecVal > 0)
+                                    {
+                                       double decimalBit = exponentiate(0.1, postDecVal);
+                                       num = num + ((key - '0') * exponentiate(0.1, postDecVal));
+                                       postDecVal++;
+                                    }
+                                    else 
+                                       num = num * 10 + (key - '0');
+                                    char value[] = {key, '\0'};
+                                    Serial.print(value);
+                                    Serial.print("are we here?");
+                                    lcdScreen.print(value); 
+                                    Serial.print("why are we not printing?");
+                                    break;
+                                 }
+                                 case '.': 
+                                 {
+                                    postDecVal++;
+                                    lcdScreen.print(".");
+                                    break;
+                                 }
+                               }
+                            }
+                            key = kpd.getKey();
+                            menuChoice = readButtons();
+                            Serial.print(num);
+                         }
+                         currentSession.treatmentTime = num;
                          sequenceNum++;
                          break;
                      }
                      case 3:
                      {
-                         bmpDraw("disp_uf.bmp", 0, 0);
-                         lcdScreen.write(12);
+                         lcdScreen.write(12); // Clear
+                         lcdScreen.print("Ultrafilt. rate");  // First line
+                         lcdScreen.write(13);                 // Carriage return
                          calculateUltraFiltrationRate();
                          lcdScreen.print(currentSession.ufRate);  
                          sequenceNum++;
@@ -258,8 +309,15 @@ void process(int n)
                break;
             }
             case 4: // back
-            {            
-               if (inSetup)
+            {     
+               if (inTreatment) // okay this patently DOES NOT WORK and I'm just gonna have to live with that I guess...
+               {
+                  bmpDraw("main.bmp", 0, 0);
+                  inHomePage = true;
+                  inContent = false;
+                  inTreatment = false;
+               }
+               else if (inSetup)
                {
                   Serial.print("I am in content");
                   switch(sequenceNum)
@@ -390,9 +448,11 @@ void process(int n)
              Serial.print("here!");
              inTreatment = true;
            //  screen.text("Enter the patient's current weight (in kg) and press SELECT: \n",0,0);
-             bmpDraw("cweight.bmp", 0, 0);
+             bmpDraw("ventry.bmp", 0, 0);
              char key = kpd.getKey(); 
              lcdScreen.write(12);
+             lcdScreen.print("Current weight:");  // First line
+             lcdScreen.write(13);     
              //currentSession.currentWeight = getNumber(key);
              double num = 0;
              int postDecVal = 0; // Tracks whether we have added a decimal point yet, and how far along we are.
